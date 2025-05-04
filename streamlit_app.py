@@ -47,7 +47,9 @@ with tabs[0]:
         xaxis_title="Значение",
         yaxis_title="Плотность вероятности",
         bargap=0.1,
-        hovermode="x"
+        hovermode="x",
+        height=500,
+        margin=dict(l=50, r=50, t=60, b=50)
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -99,7 +101,9 @@ with tabs[1]:
         title=f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})",
         xaxis_title="Среднее значение выборки",
         yaxis_title="Частота",
-        hovermode="x"
+        hovermode="x",
+        height=400,
+        margin=dict(l=40, r=40, t=60, b=40)
     )
 
     st.plotly_chart(fig2, use_container_width=True)
@@ -150,7 +154,9 @@ with tabs[2]:
         title="Закон больших чисел",
         xaxis_title="Количество испытаний",
         yaxis_title="Среднее значение",
-        hovermode="x"
+        hovermode="x",
+        height=400,
+        margin=dict(l=40, r=40, t=60, b=40)
     )
 
     st.plotly_chart(fig3, use_container_width=True)
