@@ -7,6 +7,9 @@
 - Центральная предельная теорема (ЦПТ)
 - Закон больших чисел (ЗБЧ)
 
+Ссылка на развернутое приложение
+https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/
+
 ![Скриншот работы](![image](https://github.com/user-attachments/assets/9b8b1e2b-e321-4341-81b8-d32f9916de62)
 
 ## Запуск локально
@@ -17,7 +20,5 @@ cd my-streamlit-app
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 
-Ссылка на развернутое приложение
-https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/
 
 
