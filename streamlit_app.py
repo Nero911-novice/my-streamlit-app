@@ -48,11 +48,15 @@ with tabs[0]:
         yaxis_title="Плотность вероятности",
         bargap=0.1,
         hovermode="x",
-        height=700,
-        margin=dict(l=50, r=50, t=60, b=50)
+        autosize=True,
+        margin=dict(l=30, r=30, t=50, b=30)
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={"responsive": True, "displaylogo": False}
+    )
 
     st.markdown(f"""
     **Пояснение**  
