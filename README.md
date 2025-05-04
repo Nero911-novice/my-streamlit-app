@@ -8,7 +8,6 @@
 - Закон больших чисел (ЗБЧ)
 
 ![Скриншот работы](![image](https://github.com/user-attachments/assets/9b8b1e2b-e321-4341-81b8-d32f9916de62)
-)
 
 ## Запуск локально
 
