@@ -27,11 +27,25 @@ with tabs[0]:
         ax.axvline(mu - i * sigma, color='red', linestyle='--', linewidth=1)
         ax.axvline(mu + i * sigma, color='red', linestyle='--', linewidth=1)
 
+    # Добавляем пояснения с экранированными \\n
+    ax.annotate("68% значений\\n(±1σ)", xy=(mu, 0.04), xytext=(mu + 5, 0.042),
+                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
+    ax.annotate("95% значений\\n(±2σ)", xy=(mu - 2 * sigma + 1, 0.01), xytext=(mu - 15, 0.025),
+                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
+    ax.annotate("Почти все значения\\nв пределах ±3σ", xy=(mu + 2.5 * sigma, 0.01),
+                xytext=(mu + 15, 0.015),
+                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
+
     ax.set_title(f"Закон трёх сигм (μ = {mu}, σ = {sigma})")
     ax.set_xlabel("Значение")
     ax.set_ylabel("Плотность вероятности")
     ax.legend()
     st.pyplot(fig)
+
+    # Кнопка загрузки
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png")
+    st.download_button("📥 Скачать график (PNG)", data=buffer.getvalue(), file_name="three_sigma.png", mime="image/png")
 
     st.markdown(f"""
     **Пояснение**  
@@ -42,6 +56,7 @@ with tabs[0]:
 
     Здесь μ = {mu}, σ = {sigma}, n = {size}.
     """)
+'''
 
 # === ЦПТ ===
 with tabs[1]:
