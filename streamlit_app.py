@@ -48,7 +48,7 @@ with tabs[0]:
         yaxis_title="Плотность вероятности",
         bargap=0.1,
         hovermode="x",
-        height=500,
+        height=700,
         margin=dict(l=50, r=50, t=60, b=50)
     )
 
@@ -102,7 +102,7 @@ with tabs[1]:
         xaxis_title="Среднее значение выборки",
         yaxis_title="Частота",
         hovermode="x",
-        height=400,
+        height=700,
         margin=dict(l=40, r=40, t=60, b=40)
     )
 
@@ -155,7 +155,7 @@ with tabs[2]:
         xaxis_title="Количество испытаний",
         yaxis_title="Среднее значение",
         hovermode="x",
-        height=400,
+        height=500,
         margin=dict(l=40, r=40, t=60, b=40)
     )
 
