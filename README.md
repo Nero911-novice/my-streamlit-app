@@ -3,7 +3,7 @@
 ![Streamlit](https://img.shields.io/badge/built%20with-Streamlit-blue)
 
 Интерактивное приложение на Python/Streamlit для демонстрации:
-- Закон трёх сигм
+- Закон трёх сигм (эмпирическое правило 68–95–99.7%)
 - Центральная предельная теорема (ЦПТ)
 - Закон больших чисел (ЗБЧ)
 
@@ -17,5 +17,7 @@ cd my-streamlit-app
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 
-### **Ссылка на задеплой**
+Ссылка на развернутое приложение
 https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/
+
+
