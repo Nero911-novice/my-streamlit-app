@@ -1,16 +1,13 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from io import BytesIO
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="Демоверсия вероятностных законов", layout="wide")
-sns.set_theme(style="whitegrid")
 
 st.title("📊 Демонстрация вероятностных законов")
 tabs = st.tabs(["Закон трёх сигм", "ЦПТ", "ЗБЧ"])
 
-# === Закон трёх сигм ===
+# === Вкладка 1: Закон трёх сигм ===
 with tabs[0]:
     st.header("Закон трёх сигм (эмпирическое правило)")
     mu = st.slider("Среднее (μ)", 20, 80, 50)
@@ -18,37 +15,42 @@ with tabs[0]:
     size = st.slider("Размер выборки", 1000, 50000, 10000, step=1000)
 
     data = np.random.normal(mu, sigma, size)
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.hist(data, bins=50, density=True, color='lightgray', edgecolor='black')
 
-    for i, color, label in zip(
-        [1, 2, 3],
-        ['#b2df8a', '#fdbf6f', '#fb9a99'],
-        ['±1σ (68%)', '±2σ (95%)', '±3σ (99.7%)']
-    ):
-        ax.axvspan(mu - i * sigma, mu + i * sigma, color=color, alpha=0.3, label=label)
-        ax.axvline(mu - i * sigma, color='red', linestyle='--', linewidth=1)
-        ax.axvline(mu + i * sigma, color='red', linestyle='--', linewidth=1)
+    fig = go.Figure()
+    fig.add_trace(go.Histogram(
+        x=data,
+        nbinsx=50,
+        histnorm="probability density",
+        marker_color="lightgray",
+        name="Данные",
+        opacity=0.75
+    ))
 
-    # Аннотации
-    ax.annotate("68% значений\n(±1σ)", xy=(mu, 0.04), xytext=(mu + 5, 0.042),
-                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
-    ax.annotate("95% значений\n(±2σ)", xy=(mu - 2 * sigma + 1, 0.01), xytext=(mu - 15, 0.025),
-                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
-    ax.annotate("Почти все значения\nв пределах ±3σ", xy=(mu + 2.5 * sigma, 0.01),
-                xytext=(mu + 15, 0.015),
-                arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
+    colors = [
+        "rgba(178,223,138,0.3)",
+        "rgba(253,191,111,0.3)",
+        "rgba(251,154,153,0.3)"
+    ]
+    labels = ["±1σ (68%)", "±2σ (95%)", "±3σ (99.7%)"]
 
-    ax.set_title(f"Закон трёх сигм (μ = {mu}, σ = {sigma})")
-    ax.set_xlabel("Значение")
-    ax.set_ylabel("Плотность вероятности")
-    ax.legend()
-    st.pyplot(fig)
+    for i, color, label in zip([1, 2, 3], colors, labels):
+        fig.add_vrect(
+            x0=mu - i * sigma, x1=mu + i * sigma,
+            fillcolor=color, line_width=0,
+            annotation_text=label, annotation_position="top left"
+        )
+        fig.add_vline(x=mu - i * sigma, line_dash="dash", line_color="red")
+        fig.add_vline(x=mu + i * sigma, line_dash="dash", line_color="red")
 
-    # Скачивание PNG
-    buf1 = BytesIO()
-    fig.savefig(buf1, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf1.getvalue(), "three_sigma.png", "image/png")
+    fig.update_layout(
+        title=f"Закон трёх сигм (μ = {mu}, σ = {sigma})",
+        xaxis_title="Значение",
+        yaxis_title="Плотность вероятности",
+        bargap=0.1,
+        hovermode="x"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(f"""
     **Пояснение**  
@@ -60,39 +62,47 @@ with tabs[0]:
     Здесь μ = {mu}, σ = {sigma}, n = {size}.
     """)
 
-# === ЦПТ ===
+# === Вкладка 2: Центральная предельная теорема ===
 with tabs[1]:
     st.header("Центральная предельная теорема")
-    dist_type = st.selectbox("Выберите распределение", ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"])
+    dist_type = st.selectbox(
+        "Выберите распределение",
+        ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"]
+    )
     sample_size = st.slider("Размер одной выборки", 2, 100, 30)
     num_samples = st.slider("Количество выборок", 100, 5000, 1000, step=100)
 
-    def generate(dist_type, size):
-        if dist_type == "Равномерное":
-            return np.random.uniform(0, 1, size)
-        elif dist_type == "Экспоненциальное":
-            return np.random.exponential(1.0, size)
-        elif dist_type == "Бимодальное":
-            half = size // 2
+    def generate(dist, n):
+        if dist == "Равномерное":
+            return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное":
+            return np.random.exponential(1.0, n)
+        if dist == "Бимодальное":
+            h = n // 2
             return np.concatenate([
-                np.random.normal(-2, 1, half),
-                np.random.normal(2, 1, size - half)
+                np.random.normal(-2, 1, h),
+                np.random.normal(2, 1, n - h)
             ])
-        else:
-            return np.random.normal(0, 1, size)
+        return np.random.normal(0, 1, n)
 
     means = [np.mean(generate(dist_type, sample_size)) for _ in range(num_samples)]
 
-    fig2, ax2 = plt.subplots(figsize=(10, 5))
-    sns.histplot(means, bins=30, kde=True, ax=ax2, color="skyblue", edgecolor='black')
-    ax2.set_title(f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})")
-    ax2.set_xlabel("Среднее значение выборки")
-    ax2.set_ylabel("Частота")
-    st.pyplot(fig2)
+    fig2 = go.Figure()
+    fig2.add_trace(go.Histogram(
+        x=means,
+        nbinsx=30,
+        marker_color="skyblue",
+        name="Средние выборки",
+        opacity=0.75
+    ))
+    fig2.update_layout(
+        title=f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})",
+        xaxis_title="Среднее значение выборки",
+        yaxis_title="Частота",
+        hovermode="x"
+    )
 
-    buf2 = BytesIO()
-    fig2.savefig(buf2, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf2.getvalue(), "clt.png", "image/png")
+    st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown(f"""
     **Пояснение**  
@@ -102,36 +112,48 @@ with tabs[1]:
     Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.
     """)
 
-# === ЗБЧ ===
+# === Вкладка 3: Закон больших чисел ===
 with tabs[2]:
     st.header("Закон больших чисел")
-    dist_type_lln = st.selectbox("Распределение данных", ["Нормальное", "Равномерное", "Экспоненциальное"], key="lln")
+    dist_type_lln = st.selectbox(
+        "Распределение данных",
+        ["Нормальное", "Равномерное", "Экспоненциальное"],
+        key="lln"
+    )
     trials = st.slider("Количество испытаний", 100, 20000, 10000, step=100)
 
-    def sample(dist_type, trials):
-        if dist_type == "Равномерное":
-            return np.random.uniform(0, 1, trials)
-        elif dist_type == "Экспоненциальное":
-            return np.random.exponential(1.0, trials)
-        else:
-            return np.random.normal(0, 1, trials)
+    def sample(dist, n):
+        if dist == "Равномерное":
+            return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное":
+            return np.random.exponential(1.0, n)
+        return np.random.normal(0, 1, n)
 
     data_lln = sample(dist_type_lln, trials)
     cumulative = np.cumsum(data_lln) / np.arange(1, trials + 1)
     expected = np.mean(data_lln)
 
-    fig3, ax3 = plt.subplots(figsize=(10, 5))
-    ax3.plot(cumulative, label="Накопленное среднее")
-    ax3.axhline(expected, color='r', linestyle='--', label=f"Теоретическое среднее ({expected:.2f})")
-    ax3.set_title("Закон больших чисел")
-    ax3.set_xlabel("Количество испытаний")
-    ax3.set_ylabel("Среднее значение")
-    ax3.legend()
-    st.pyplot(fig3)
+    fig3 = go.Figure()
+    fig3.add_trace(go.Scatter(
+        y=cumulative,
+        mode="lines",
+        name="Накопленное среднее"
+    ))
+    fig3.add_hline(
+        y=expected,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=f"Теоретическое среднее ({expected:.2f})",
+        annotation_position="bottom right"
+    )
+    fig3.update_layout(
+        title="Закон больших чисел",
+        xaxis_title="Количество испытаний",
+        yaxis_title="Среднее значение",
+        hovermode="x"
+    )
 
-    buf3 = BytesIO()
-    fig3.savefig(buf3, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf3.getvalue(), "lln.png", "image/png")
+    st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown(f"""
     **Пояснение**  
