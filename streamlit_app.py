@@ -22,53 +22,64 @@ with tabs[0]:
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.hist(data, bins=50, density=True, color='lightgray', edgecolor='black')
 
-    # Заливки зон ±1σ, ±2σ, ±3σ
+    # Заливки зон ±1σ, ±2σ, ±3σ и их границы
     colors = ['#b2df8a', '#fdbf6f', '#fb9a99']
     labels = ['±1σ (68%)', '±2σ (95%)', '±3σ (99.7%)']
     for i, color, label in zip([1, 2, 3], colors, labels):
-        ax.axvspan(mu - i*sigma, mu + i*sigma, color=color, alpha=0.3)
-        ax.axvline(mu - i*sigma, color='red', linestyle='--')
-        ax.axvline(mu + i*sigma, color='red', linestyle='--')
+        ax.axvspan(mu - i * sigma, mu + i * sigma, color=color, alpha=0.3, label=label)
+        ax.axvline(mu - i * sigma, color='red', linestyle='--', linewidth=1)
+        ax.axvline(mu + i * sigma, color='red', linestyle='--', linewidth=1)
 
-    # Авто-положение для аннотаций
+    # Получаем верхнюю границу оси Y
     ymax = ax.get_ylim()[1]
-    # 1σ
+
+    # Аннотации с фиксированным смещением в пунктах
+    # 1σ — опускаем подписку ниже стрелки
     ax.annotate(
         "68% значений\n(±1σ)",
-        xy=(mu, ymax*0.9), xycoords='data',
-        xytext=(0, 30), textcoords='offset points',
-        ha='center', va='bottom',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        xy=(mu, ymax * 0.9),
+        xycoords='data',
+        xytext=(0, -40),                 # вниз на 40 пунктов
+        textcoords='offset points',
+        ha='center', va='top',
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
     # 2σ
     ax.annotate(
         "95% значений\n(±2σ)",
-        xy=(mu - 2*sigma, ymax*0.6), xycoords='data',
-        xytext=(-40, -10), textcoords='offset points',
+        xy=(mu - 2 * sigma, ymax * 0.6),
+        xycoords='data',
+        xytext=(-40, -10),               # влево и вниз
+        textcoords='offset points',
         ha='left', va='top',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
     # 3σ
     ax.annotate(
         "Почти все значения\nв пределах ±3σ",
-        xy=(mu + 2.5*sigma, ymax*0.6), xycoords='data',
-        xytext=(40, -10), textcoords='offset points',
+        xy=(mu + 2.5 * sigma, ymax * 0.6),
+        xycoords='data',
+        xytext=(40, -10),                # вправо и вниз
+        textcoords='offset points',
         ha='right', va='top',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
 
     ax.set_title(f"Закон трёх сигм (μ = {mu}, σ = {sigma})")
     ax.set_xlabel("Значение")
     ax.set_ylabel("Плотность вероятности")
-    ax.legend(labels)
+    ax.legend()
 
     fig.tight_layout()
     st.pyplot(fig, use_container_width=True)
 
-    # Скачать PNG
+    # Кнопка скачивания
     buf1 = BytesIO()
-    fig.savefig(buf1, format='png')
-    st.download_button("📥 Скачать график (PNG)", buf1.getvalue(), "three_sigma_fixed.png", "image/png")
+    fig.savefig(buf1, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf1.getvalue(), "three_sigma.png", "image/png")
 
     st.markdown(f"""
     **Пояснение**  
@@ -78,25 +89,33 @@ with tabs[0]:
     - около **99.7%** — в диапазон ±3σ.
 
     Здесь μ = {mu}, σ = {sigma}, n = {size}.
-    """ )
+    """)
 
 # === 2. Центральная предельная теорема ===
 with tabs[1]:
     st.header("Центральная предельная теорема")
-    dist_type = st.selectbox("Выберите распределение", ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"])
+    dist_type = st.selectbox(
+        "Выберите распределение",
+        ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"]
+    )
     sample_size = st.slider("Размер одной выборки", 2, 100, 30)
     num_samples = st.slider("Количество выборок", 100, 5000, 1000, step=100)
 
     def generate(dist, n):
-        if dist == "Равномерное": return np.random.uniform(0,1,n)
-        if dist == "Экспоненциальное": return np.random.exponential(1.0,n)
+        if dist == "Равномерное":
+            return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное":
+            return np.random.exponential(1.0, n)
         if dist == "Бимодальное":
-            h = n//2
-            return np.concatenate([np.random.normal(-2,1,h), np.random.normal(2,1,n-h)])
-        return np.random.normal(0,1,n)
+            half = n // 2
+            return np.concatenate([
+                np.random.normal(-2, 1, half),
+                np.random.normal(2, 1, n - half)
+            ])
+        return np.random.normal(0, 1, n)
 
     means = [np.mean(generate(dist_type, sample_size)) for _ in range(num_samples)]
-    fig2, ax2 = plt.subplots(figsize=(10,5))
+    fig2, ax2 = plt.subplots(figsize=(10, 5))
     sns.histplot(means, bins=30, kde=True, ax=ax2, color="skyblue", edgecolor='black')
 
     ax2.set_title(f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})")
@@ -107,8 +126,8 @@ with tabs[1]:
     st.pyplot(fig2, use_container_width=True)
 
     buf2 = BytesIO()
-    fig2.savefig(buf2, format='png')
-    st.download_button("📥 Скачать график (PNG)", buf2.getvalue(), "clt_fixed.png", "image/png")
+    fig2.savefig(buf2, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf2.getvalue(), "clt.png", "image/png")
 
     st.markdown(f"""
     **Пояснение**  
@@ -116,26 +135,34 @@ with tabs[1]:
     распределение **средних значений** будет стремиться к нормальному при увеличении размера выборки.
 
     Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.
-    """ )
+    """)
 
 # === 3. Закон больших чисел ===
 with tabs[2]:
     st.header("Закон больших чисел")
-    dist_type_lln = st.selectbox("Распределение данных", ["Нормальное", "Равномерное", "Экспоненциальное"], key="lln")
-    trials = st.slider("Количество испытаний", 100,20000,10000,step=100)
+    dist_type_lln = st.selectbox(
+        "Распределение данных",
+        ["Нормальное", "Равномерное", "Экспоненциальное"],
+        key="lln"
+    )
+    trials = st.slider("Количество испытаний", 100, 20000, 10000, step=100)
 
-    def sample(dist,n):
-        if dist=="Равномерное": return np.random.uniform(0,1,n)
-        if dist=="Экспоненциальное": return np.random.exponential(1.0,n)
-        return np.random.normal(0,1,n)
+    def sample(dist, n):
+        if dist == "Равномерное":
+            return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное":
+            return np.random.exponential(1.0, n)
+        return np.random.normal(0, 1, n)
 
     data_lln = sample(dist_type_lln, trials)
-    cumulative = np.cumsum(data_lln)/np.arange(1, trials+1)
+    cumulative = np.cumsum(data_lln) / np.arange(1, trials + 1)
     expected = np.mean(data_lln)
 
-    fig3, ax3 = plt.subplots(figsize=(10,5))
+    fig3, ax3 = plt.subplots(figsize=(10, 5))
     ax3.plot(cumulative, label="Накопленное среднее")
-    ax3.axhline(expected, color='r', linestyle='--', label=f"Теоретическое среднее ({expected:.2f})")
+    ax3.axhline(expected, color='r', linestyle='--',
+                label=f"Теоретическое среднее ({expected:.2f})")
+
     ax3.set_title("Закон больших чисел")
     ax3.set_xlabel("Количество испытаний")
     ax3.set_ylabel("Среднее значение")
@@ -145,11 +172,11 @@ with tabs[2]:
     st.pyplot(fig3, use_container_width=True)
 
     buf3 = BytesIO()
-    fig3.savefig(buf3, format='png')
-    st.download_button("📥 Скачать график (PNG)", buf3.getvalue(), "lln_fixed.png", "image/png")
+    fig3.savefig(buf3, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf3.getvalue(), "lln.png", "image/png")
 
     st.markdown(f"""
     **Пояснение**  
     _Закон больших чисел_ утверждает, что по мере увеличения количества наблюдений среднее значение будет сходиться
     к математическому ожиданию распределения. Здесь использовано **{trials}** испытаний из **{dist_type_lln.lower()} распределения**.
-    """ )
+    """)
