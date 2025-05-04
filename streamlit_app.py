@@ -17,15 +17,17 @@ with tabs[0]:
     data = np.random.normal(mu, sigma, size)
 
     fig = go.Figure()
+    # гистограмма
     fig.add_trace(go.Histogram(
         x=data,
         nbinsx=50,
         histnorm="probability density",
         marker_color="lightgray",
-        name="Данные",
-        opacity=0.75
+        opacity=0.75,
+        name="Данные"
     ))
 
+    # зоны ±1σ, ±2σ, ±3σ
     colors = [
         "rgba(178,223,138,0.3)",
         "rgba(253,191,111,0.3)",
@@ -33,14 +35,14 @@ with tabs[0]:
     ]
     labels = ["±1σ (68%)", "±2σ (95%)", "±3σ (99.7%)"]
 
-    for i, color, label in zip([1, 2, 3], colors, labels):
+    for i, color, label in zip([1,2,3], colors, labels):
         fig.add_vrect(
-            x0=mu - i * sigma, x1=mu + i * sigma,
+            x0=mu - i*sigma, x1=mu + i*sigma,
             fillcolor=color, line_width=0,
             annotation_text=label, annotation_position="top left"
         )
-        fig.add_vline(x=mu - i * sigma, line_dash="dash", line_color="red")
-        fig.add_vline(x=mu + i * sigma, line_dash="dash", line_color="red")
+        fig.add_vline(x=mu - i*sigma, line_dash="dash", line_color="red")
+        fig.add_vline(x=mu + i*sigma, line_dash="dash", line_color="red")
 
     fig.update_layout(
         title=f"Закон трёх сигм (μ = {mu}, σ = {sigma})",
@@ -55,7 +57,7 @@ with tabs[0]:
     st.plotly_chart(
         fig,
         use_container_width=True,
-        config={"responsive": True, "displaylogo": False}
+        config={"responsive": True, "displayModeBar": False}
     )
 
     st.markdown(f"""
@@ -80,16 +82,16 @@ with tabs[1]:
 
     def generate(dist, n):
         if dist == "Равномерное":
-            return np.random.uniform(0, 1, n)
+            return np.random.uniform(0,1,n)
         if dist == "Экспоненциальное":
-            return np.random.exponential(1.0, n)
+            return np.random.exponential(1.0,n)
         if dist == "Бимодальное":
-            h = n // 2
+            h = n//2
             return np.concatenate([
-                np.random.normal(-2, 1, h),
-                np.random.normal(2, 1, n - h)
+                np.random.normal(-2,1,h),
+                np.random.normal(2,1,n-h)
             ])
-        return np.random.normal(0, 1, n)
+        return np.random.normal(0,1,n)
 
     means = [np.mean(generate(dist_type, sample_size)) for _ in range(num_samples)]
 
@@ -98,19 +100,22 @@ with tabs[1]:
         x=means,
         nbinsx=30,
         marker_color="skyblue",
-        name="Средние выборки",
-        opacity=0.75
+        opacity=0.75,
+        name="Средние выборки"
     ))
     fig2.update_layout(
         title=f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})",
         xaxis_title="Среднее значение выборки",
         yaxis_title="Частота",
         hovermode="x",
-        height=700,
-        margin=dict(l=40, r=40, t=60, b=40)
+        autosize=True,
+        margin=dict(l=30, r=30, t=50, b=30)
     )
-
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(
+        fig2,
+        use_container_width=True,
+        config={"responsive": True, "displayModeBar": False}
+    )
 
     st.markdown(f"""
     **Пояснение**  
@@ -132,13 +137,13 @@ with tabs[2]:
 
     def sample(dist, n):
         if dist == "Равномерное":
-            return np.random.uniform(0, 1, n)
+            return np.random.uniform(0,1,n)
         if dist == "Экспоненциальное":
-            return np.random.exponential(1.0, n)
-        return np.random.normal(0, 1, n)
+            return np.random.exponential(1.0,n)
+        return np.random.normal(0,1,n)
 
     data_lln = sample(dist_type_lln, trials)
-    cumulative = np.cumsum(data_lln) / np.arange(1, trials + 1)
+    cumulative = np.cumsum(data_lln) / np.arange(1, trials+1)
     expected = np.mean(data_lln)
 
     fig3 = go.Figure()
@@ -159,11 +164,14 @@ with tabs[2]:
         xaxis_title="Количество испытаний",
         yaxis_title="Среднее значение",
         hovermode="x",
-        height=500,
-        margin=dict(l=40, r=40, t=60, b=40)
+        autosize=True,
+        margin=dict(l=30, r=30, t=50, b=30)
     )
-
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(
+        fig3,
+        use_container_width=True,
+        config={"responsive": True, "displayModeBar": False}
+    )
 
     st.markdown(f"""
     **Пояснение**  
