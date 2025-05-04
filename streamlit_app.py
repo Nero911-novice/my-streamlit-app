@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
 
+# --- Настройка страницы ---
 st.set_page_config(page_title="Демоверсия вероятностных законов", layout="wide")
 sns.set_theme(style="whitegrid")
 
 st.title("📊 Демонстрация вероятностных законов")
 tabs = st.tabs(["Закон трёх сигм", "ЦПТ", "ЗБЧ"])
 
-# === Закон трёх сигм ===
+# === 1. Закон трёх сигм ===
 with tabs[0]:
     st.header("Закон трёх сигм (эмпирическое правило)")
     mu = st.slider("Среднее (μ)", 20, 80, 50)
@@ -19,18 +20,17 @@ with tabs[0]:
 
     data = np.random.normal(mu, sigma, size)
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.hist(data, bins=50, density=True, color='lightgray', edgecolor='black')
 
+    ax.hist(data, bins=50, density=True, color='lightgray', edgecolor='black')
     for i, color, label in zip(
         [1, 2, 3],
         ['#b2df8a', '#fdbf6f', '#fb9a99'],
         ['±1σ (68%)', '±2σ (95%)', '±3σ (99.7%)']
     ):
         ax.axvspan(mu - i * sigma, mu + i * sigma, color=color, alpha=0.3, label=label)
-        ax.axvline(mu - i * sigma, color='red', linestyle='--', linewidth=1)
-        ax.axvline(mu + i * sigma, color='red', linestyle='--', linewidth=1)
+        ax.axvline(mu - i * sigma, color='red', linestyle='--')
+        ax.axvline(mu + i * sigma, color='red', linestyle='--')
 
-    # Аннотации
     ax.annotate("68% значений\n(±1σ)", xy=(mu, 0.04), xytext=(mu + 5, 0.042),
                 arrowprops=dict(facecolor='black', arrowstyle='->'), fontsize=9)
     ax.annotate("95% значений\n(±2σ)", xy=(mu - 2 * sigma + 1, 0.01), xytext=(mu - 15, 0.025),
@@ -43,9 +43,11 @@ with tabs[0]:
     ax.set_xlabel("Значение")
     ax.set_ylabel("Плотность вероятности")
     ax.legend()
-    st.pyplot(fig)
 
-    # Скачивание PNG
+    fig.tight_layout()
+    st.pyplot(fig, use_container_width=True)
+
+    # кнопка скачивания
     buf1 = BytesIO()
     fig.savefig(buf1, format="png")
     st.download_button("📥 Скачать график (PNG)", buf1.getvalue(), "three_sigma.png", "image/png")
@@ -60,35 +62,35 @@ with tabs[0]:
     Здесь μ = {mu}, σ = {sigma}, n = {size}.
     """)
 
-# === ЦПТ ===
+# === 2. Центральная предельная теорема ===
 with tabs[1]:
     st.header("Центральная предельная теорема")
-    dist_type = st.selectbox("Выберите распределение", ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"])
+    dist_type = st.selectbox("Выберите распределение",
+                             ["Нормальное", "Равномерное", "Экспоненциальное", "Бимодальное"])
     sample_size = st.slider("Размер одной выборки", 2, 100, 30)
     num_samples = st.slider("Количество выборок", 100, 5000, 1000, step=100)
 
-    def generate(dist_type, size):
-        if dist_type == "Равномерное":
-            return np.random.uniform(0, 1, size)
-        elif dist_type == "Экспоненциальное":
-            return np.random.exponential(1.0, size)
-        elif dist_type == "Бимодальное":
-            half = size // 2
+    def generate(dist, n):
+        if dist == "Равномерное": return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное": return np.random.exponential(1.0, n)
+        if dist == "Бимодальное":
+            h = n // 2
             return np.concatenate([
-                np.random.normal(-2, 1, half),
-                np.random.normal(2, 1, size - half)
+                np.random.normal(-2, 1, h),
+                np.random.normal(2, 1, n-h)
             ])
-        else:
-            return np.random.normal(0, 1, size)
+        return np.random.normal(0, 1, n)
 
     means = [np.mean(generate(dist_type, sample_size)) for _ in range(num_samples)]
-
     fig2, ax2 = plt.subplots(figsize=(10, 5))
     sns.histplot(means, bins=30, kde=True, ax=ax2, color="skyblue", edgecolor='black')
+
     ax2.set_title(f"ЦПТ: Средние {num_samples} выборок ({dist_type}, размер = {sample_size})")
     ax2.set_xlabel("Среднее значение выборки")
     ax2.set_ylabel("Частота")
-    st.pyplot(fig2)
+
+    fig2.tight_layout()
+    st.pyplot(fig2, use_container_width=True)
 
     buf2 = BytesIO()
     fig2.savefig(buf2, format="png")
@@ -96,25 +98,23 @@ with tabs[1]:
 
     st.markdown(f"""
     **Пояснение**  
-    _Центральная предельная теорема_ утверждает, что независимо от распределения исходных данных
+    Центральная предельная теорема утверждает, что независимо от распределения исходных данных
     распределение **средних значений** будет стремиться к нормальному при увеличении размера выборки.
 
     Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.
     """)
 
-# === ЗБЧ ===
+# === 3. Закон больших чисел ===
 with tabs[2]:
     st.header("Закон больших чисел")
-    dist_type_lln = st.selectbox("Распределение данных", ["Нормальное", "Равномерное", "Экспоненциальное"], key="lln")
+    dist_type_lln = st.selectbox("Распределение данных",
+                                 ["Нормальное", "Равномерное", "Экспоненциальное"], key="lln")
     trials = st.slider("Количество испытаний", 100, 20000, 10000, step=100)
 
-    def sample(dist_type, trials):
-        if dist_type == "Равномерное":
-            return np.random.uniform(0, 1, trials)
-        elif dist_type == "Экспоненциальное":
-            return np.random.exponential(1.0, trials)
-        else:
-            return np.random.normal(0, 1, trials)
+    def sample(dist, n):
+        if dist == "Равномерное": return np.random.uniform(0, 1, n)
+        if dist == "Экспоненциальное": return np.random.exponential(1.0, n)
+        return np.random.normal(0, 1, n)
 
     data_lln = sample(dist_type_lln, trials)
     cumulative = np.cumsum(data_lln) / np.arange(1, trials + 1)
@@ -127,7 +127,9 @@ with tabs[2]:
     ax3.set_xlabel("Количество испытаний")
     ax3.set_ylabel("Среднее значение")
     ax3.legend()
-    st.pyplot(fig3)
+
+    fig3.tight_layout()
+    st.pyplot(fig3, use_container_width=True)
 
     buf3 = BytesIO()
     fig3.savefig(buf3, format="png")
@@ -135,6 +137,6 @@ with tabs[2]:
 
     st.markdown(f"""
     **Пояснение**  
-    _Закон больших чисел_ утверждает, что по мере увеличения количества наблюдений среднее значение будет сходиться
+    Закон больших чисел утверждает, что по мере увеличения количества наблюдений среднее значение будет сходиться
     к математическому ожиданию распределения. Здесь использовано **{trials}** испытаний из **{dist_type_lln.lower()} распределения**.
     """)
