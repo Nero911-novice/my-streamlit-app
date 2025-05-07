@@ -30,24 +30,32 @@ with tabs[0]:
         ax.axvline(mu - i * sigma, color='red', linestyle='--', linewidth=1)
         ax.axvline(mu + i * sigma, color='red', linestyle='--', linewidth=1)
 
-    # Нижняя и верхняя границы по Y
     ymax = ax.get_ylim()[1]
 
-    # Аннотации с фиксированным смещением
+    # Аннотации
     ax.annotate(
-        "68% значений\n(±1σ)", xy=(mu, ymax * 0.9), xycoords='data',
-        xytext=(0, -40), textcoords='offset points', ha='center', va='top',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        "68% значений\n(±1σ)",
+        xy=(mu, ymax * 0.9), xycoords='data',
+        xytext=(0, -40), textcoords='offset points',
+        ha='center', va='top',
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
     ax.annotate(
-        "95% значений\n(±2σ)", xy=(mu - 2 * sigma, ymax * 0.6), xycoords='data',
-        xytext=(-40, -10), textcoords='offset points', ha='left', va='top',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        "95% значений\n(±2σ)",
+        xy=(mu - 2*sigma, ymax * 0.6), xycoords='data',
+        xytext=(-40, -10), textcoords='offset points',
+        ha='left', va='top',
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
     ax.annotate(
-        "Почти все значения\nв пределах ±3σ", xy=(mu + 2.5 * sigma, ymax * 0.6), xycoords='data',
-        xytext=(40, -10), textcoords='offset points', ha='right', va='top',
-        arrowprops=dict(arrowstyle='->', color='black'), fontsize=9
+        "Почти все значения\nв пределах ±3σ",
+        xy=(mu + 2.5*sigma, ymax * 0.6), xycoords='data',
+        xytext=(40, -10), textcoords='offset points',
+        ha='right', va='top',
+        arrowprops=dict(arrowstyle='->', color='black'),
+        fontsize=9
     )
 
     ax.set_title(f"Закон трёх сигм (μ = {mu}, σ = {sigma})")
@@ -58,10 +66,9 @@ with tabs[0]:
     fig.tight_layout()
     st.pyplot(fig, use_container_width=True)
 
-    # Кнопка скачивания
-    buf1 = BytesIO()
-    fig.savefig(buf1, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf1.getvalue(), "three_sigma.png", "image/png")
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf.getvalue(), "three_sigma.png", "image/png")
 
     st.markdown(f"""
 **Пояснение**  
@@ -70,13 +77,8 @@ with tabs[0]:
 - около **95%** — в диапазон ±2σ,
 - около **99.7%** — в диапазон ±3σ.
 """)
-
-# обычный абзац (без заголовков и без лишней жирности)
-st.markdown("""
-Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.")
-""")
-
-st.markdown("""
+    st.write(f"Здесь: μ = {mu}, σ = {sigma}, n = {size}.")
+    st.markdown("""
 🔴 **Ограничения**:
 - Работает только при приближении к нормальному распределению.
 - Неприменим к мощно скошенным, мультипиковым, дискретным распределениям.
@@ -118,21 +120,16 @@ with tabs[1]:
     fig2.tight_layout()
     st.pyplot(fig2, use_container_width=True)
 
-    buf2 = BytesIO()
-    fig2.savefig(buf2, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf2.getvalue(), "clt.png", "image/png")
+    buf = BytesIO()
+    fig2.savefig(buf, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf.getvalue(), "clt.png", "image/png")
 
     st.markdown(f"""
 **Пояснение**  
 _Центральная предельная теорема_ утверждает, что независимо от распределения исходных данных распределение **средних значений** будет стремиться к нормальному при увеличении размера выборки.
 """)
-
-# обычный абзац (без заголовков и без лишней жирности)
-st.markdown("""
-Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.
-""")
-
-st.markdown("""
+    st.write(f"Здесь: распределение = {dist_type.lower()}, размер выборки = {sample_size}, число выборок = {num_samples}.")
+    st.markdown("""
 🔴 **Ограничения**:
 - Нужны независимые и одинаково распределённые данные (i.i.d.).
 - Размер выборки должен быть достаточно большим. Для нормального случая 30+, но для тяжёлых хвостов может понадобиться 100+.
@@ -173,16 +170,16 @@ with tabs[2]:
     fig3.tight_layout()
     st.pyplot(fig3, use_container_width=True)
 
-    buf3 = BytesIO()
-    fig3.savefig(buf3, format="png")
-    st.download_button("📥 Скачать график (PNG)", buf3.getvalue(), "lln.png", "image/png")
+    buf = BytesIO()
+    fig3.savefig(buf, format="png")
+    st.download_button("📥 Скачать график (PNG)", buf.getvalue(), "lln.png", "image/png")
 
     st.markdown(f"""
 **Пояснение**  
 _Закон больших чисел_ утверждает, что по мере увеличения количества наблюдений среднее значение будет сходиться к математическому ожиданию распределения. Здесь использовано **{trials}** испытаний из **{dist_type_lln.lower()} распределения**.
 """)
-
-st.markdown("""
+    st.write(f"Здесь: распределение = {dist_type_lln.lower()}, количество испытаний = {trials}.")
+    st.markdown("""
 🔴 **Ограничения**:
 - Данные должны быть независимыми и одинаково распределёнными.
 - Сходимость может быть медленной, особенно при высокой дисперсии.
