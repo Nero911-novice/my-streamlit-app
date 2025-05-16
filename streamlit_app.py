@@ -564,7 +564,7 @@ with tabs[4]:
         data2 = generate_with_params(dist2, sample_size, **params2)
         return data1, data2
 
-data1, data2 = generate_comparison_data(dist1, dist2, params1, params2, sample_size)
+    data1, data2 = generate_comparison_data(dist1, dist2, params1, params2, sample_size)
     
     # Построение графика
     fig, ax = plt.subplots(figsize=(10, 6))
