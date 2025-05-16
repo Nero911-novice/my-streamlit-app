@@ -237,11 +237,11 @@ with tabs[1]:
         return np.random.normal(0, 1, n)
 
     @st.cache_data
-def generate_clt_means(dist_type, sample_size, num_samples):
+    def generate_clt_means(dist_type, sample_size, num_samples):
     """Кэширует вычисление выборочных средних для ЦПТ"""
     return [np.mean(generate_data(dist_type, sample_size)) for _ in range(num_samples)]
 
-means = generate_clt_means(dist_type, sample_size, num_samples)
+    means = generate_clt_means(dist_type, sample_size, num_samples)
     fig2, ax2 = plt.subplots(figsize=(10, 5))
     sns.histplot(means, bins=30, kde=True, ax=ax2, color="skyblue", edgecolor='black')
 
