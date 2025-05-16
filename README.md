@@ -23,7 +23,7 @@
 - Возможность скачивания всех графиков в формате PNG
 
 **Ссылка на развернутое приложение**
-https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/
+[https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/](https://probability-laws-demo.streamlit.app/)
 
 **Демонстрация**
  ![image](https://github.com/user-attachments/assets/bb1c968b-e7c5-43fe-ad9a-388867057c45)
