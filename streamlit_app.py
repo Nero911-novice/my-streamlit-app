@@ -284,10 +284,10 @@ with tabs[1]:
             
             # Генерация данных для текущего размера выборки
             @st.cache_data
-def generate_clt_animation_means(dist_type, n, num_samples):
-    return [np.mean(generate_data(dist_type, n)) for _ in range(num_samples)]
+            def generate_clt_animation_means(dist_type, n, num_samples):
+                return [np.mean(generate_data(dist_type, n)) for _ in range(num_samples)]
 
-means = generate_clt_animation_means(dist_type, n, num_samples)
+            means = generate_clt_animation_means(dist_type, n, num_samples)
             
             # Создание нового графика
             fig, ax = plt.subplots(figsize=(10, 5))
