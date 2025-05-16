@@ -16,7 +16,7 @@
 https://my-app-app-isqmvntqkov6qth6sey2u6.streamlit.app/
 
 **Демонстрация**
-![Скриншот работы] (![image](https://github.com/user-attachments/assets/bb1c968b-e7c5-43fe-ad9a-388867057c45)
+(![image](https://github.com/user-attachments/assets/bb1c968b-e7c5-43fe-ad9a-388867057c45)
 
 
 
