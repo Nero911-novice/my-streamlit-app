@@ -6,6 +6,108 @@ from scipy import stats  # Важно импортировать stats имен�
 from io import BytesIO
 import time  # Для использования в модуле регрессии к среднему
 
+@st.cache_data
+def generate_data(dist_type, size, mu=0, sigma=1):
+    """Генерирует данные с кэшированием для ускорения работы приложения"""
+    if dist_type == "Нормальное":
+        return np.random.normal(mu, sigma, size)
+    elif dist_type == "Равномерное":
+        return np.random.uniform(0, 1, size)
+    elif dist_type == "Экспоненциальное":
+        return np.random.exponential(1.0, size)
+    elif dist_type == "Бимодальное":
+        h = size // 2
+        return np.concatenate([np.random.normal(-2, 1, h), np.random.normal(2, 1, size-h)])
+    elif dist_type == "Хи-квадрат":
+        df = 4  # Степени свободы
+        return np.random.chisquare(df, size)
+    elif dist_type == "Биномиальное":
+        return np.random.binomial(20, 0.5, size)
+    elif dist_type == "Пуассона":
+        return np.random.poisson(5, size)
+    else:
+        # Возвращаем нормальное распределение по умолчанию
+        return np.random.normal(mu, sigma, size)
+
+# Функция для кэширования параметров распределений
+@st.cache_data
+def generate_with_params(_dist_type, size, **params):
+    """Генерирует данные с параметрами и кэшированием"""
+    if _dist_type == "Нормальное":
+        return np.random.normal(params.get('mean', 0), params.get('sd', 1), size)
+    elif _dist_type == "Равномерное":
+        return np.random.uniform(params.get('a', 0), params.get('b', 1), size)
+    elif _dist_type == "Экспоненциальное":
+        return np.random.exponential(1/params.get('lambda', 1), size)
+    elif _dist_type == "Биномиальное":
+        return np.random.binomial(params.get('n', 20), params.get('p', 0.5), size)
+    elif _dist_type == "Пуассона":
+        return np.random.poisson(params.get('mu', 5), size)
+    elif _dist_type == "Бимодальное":
+        h = size // 2
+        return np.concatenate([
+            np.random.normal(params.get('mean1', -2), params.get('sd1', 1), h),
+            np.random.normal(params.get('mean2', 2), params.get('sd2', 1), size-h)
+        ])
+    else:
+        return np.random.normal(0, 1, size)
+
+# Функция для кэширования малых выборок
+@st.cache_data
+def generate_small_samples(dist_type, n_small, num_sim):
+    """Генерирует малые выборки с кэшированием"""
+    samples = np.zeros((num_sim, n_small))
+    for i in range(num_sim):
+        if dist_type == "Нормальное":
+            samples[i] = np.random.normal(0, 1, n_small)
+        elif dist_type == "Равномерное":
+            samples[i] = np.random.uniform(0, 1, n_small)
+        elif dist_type == "Экспоненциальное":
+            samples[i] = np.random.exponential(1.0, n_small)
+        elif dist_type == "Бимодальное":
+            h = n_small // 2
+            samples[i] = np.concatenate([np.random.normal(-2, 1, h), np.random.normal(2, 1, n_small-h)])
+    return samples
+
+# Функция для безопасных вычислений статистик
+def safe_stats(data, func_name):
+    """Безопасно вычисляет статистические метрики с обработкой ошибок"""
+    try:
+        if func_name == "mean":
+            return np.mean(data)
+        elif func_name == "median":
+            return np.median(data)
+        elif func_name == "std":
+            return np.std(data)
+        elif func_name == "min":
+            return np.min(data)
+        elif func_name == "max":
+            return np.max(data)
+        elif func_name == "skew":
+            return stats.skew(data)
+        elif func_name == "kurtosis":
+            return stats.kurtosis(data)
+        else:
+            return None
+    except Exception as e:
+        if "debug_mode" in st.session_state and st.session_state.debug_mode:
+            st.write(f"Ошибка при вычислении {func_name}: {str(e)}")
+        return None
+
+# Функция для форматирования статистик
+def format_stat(data, func_name, label, precision=4):
+    """Форматирует статистику для вывода с обработкой ошибок"""
+    value = safe_stats(data, func_name)
+    if value is not None:
+        return f"{label}: {value:.{precision}f}"
+    else:
+        return f"{label}: невозможно вычислить"
+
+# Кэшируем вычисление кумулятивных средних для закона больших чисел
+@st.cache_data
+def calculate_cumulative_mean(data):
+    """Кэширует расчет кумулятивных средних"""
+    return np.cumsum(data) / np.arange(1, len(data)+1)
 # --- Настройка страницы и боковой панели с документацией ---
 sns.set_theme(style="whitegrid")
 st.set_page_config(page_title="Демоверсия вероятностных законов", layout="wide")
@@ -49,7 +151,7 @@ with tabs[0]:
     sigma = st.slider("Стандартное отклонение (σ)", 1, 30, 10)
     size = st.slider("Размер выборки", 1000, 50000, 10000, step=1000)
 
-    data = np.random.normal(mu, sigma, size)
+    data = generate_data("Нормальное", size, mu, sigma)
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.hist(data, bins=50, density=True, color='lightgray', edgecolor='black')
 
@@ -134,7 +236,12 @@ with tabs[1]:
             return np.concatenate([np.random.normal(-2, 1, h), np.random.normal(2, 1, n-h)])
         return np.random.normal(0, 1, n)
 
-    means = [np.mean(generate(dist_type, sample_size)) for _ in range(num_samples)]
+    @st.cache_data
+def generate_clt_means(dist_type, sample_size, num_samples):
+    """Кэширует вычисление выборочных средних для ЦПТ"""
+    return [np.mean(generate_data(dist_type, sample_size)) for _ in range(num_samples)]
+
+means = generate_clt_means(dist_type, sample_size, num_samples)
     fig2, ax2 = plt.subplots(figsize=(10, 5))
     sns.histplot(means, bins=30, kde=True, ax=ax2, color="skyblue", edgecolor='black')
 
@@ -176,7 +283,11 @@ with tabs[1]:
                 progress_bar.progress((i + 1) / len(sample_sizes))
             
             # Генерация данных для текущего размера выборки
-            means = [np.mean(generate(dist_type, n)) for _ in range(num_samples)]
+            @st.cache_data
+def generate_clt_animation_means(dist_type, n, num_samples):
+    return [np.mean(generate_data(dist_type, n)) for _ in range(num_samples)]
+
+means = generate_clt_animation_means(dist_type, n, num_samples)
             
             # Создание нового графика
             fig, ax = plt.subplots(figsize=(10, 5))
@@ -257,8 +368,8 @@ with tabs[2]:
         if dist == "Экспоненциальное": return np.random.exponential(1.0, n)
         return np.random.normal(0, 1, n)
 
-    data_lln = sample(dist_type_lln, trials)
-    cumulative = np.cumsum(data_lln) / np.arange(1, trials+1)
+    data_lln = generate_data(dist_type_lln, trials)
+   cumulative = calculate_cumulative_mean(data_lln)
     expected = np.mean(data_lln)
 
     fig3, ax3 = plt.subplots(figsize=(10, 5))
@@ -312,9 +423,9 @@ with tabs[3]:
     num_sim = st.slider("Количество симуляций", 100, 2000, 500, step=100)
     show_mean = st.checkbox("Показать теоретическое среднее", value=True)
 
-    # Кэшируем с помоью lru_cache можно было бы, но для простоты
+    # Кэшируем с помощью lru_cache можно было бы, но для простоты
     # Генерация и расчет
-    samples = np.random.binomial(n_small, 0.5, size=(num_sim, n_small)) / n_small if dist_small == "Экспоненциальное" else np.random.binomial(n_small, 0.5, size=(num_sim, n_small)) / n_small
+    samples = generate_small_samples(dist_small, n_small, num_sim)
     # Здесь для биномиального пример; аналогично можно менять распределение
     means_small = samples.mean(axis=1)
 
@@ -446,8 +557,14 @@ with tabs[4]:
         params2 = {'mu': mu2}
     
     # Генерация данных
-    data1 = generate_dist_data(dist1, sample_size, params1)
-    data2 = generate_dist_data(dist2, sample_size, params2)
+    @st.cache_data
+    def generate_comparison_data(dist1, dist2, params1, params2, sample_size):
+    """Кэширует генерацию данных для сравнения распределений"""
+    data1 = generate_with_params(dist1, sample_size, **params1)
+    data2 = generate_with_params(dist2, sample_size, **params2)
+    return data1, data2
+
+data1, data2 = generate_comparison_data(dist1, dist2, params1, params2, sample_size)
     
     # Построение графика
     fig, ax = plt.subplots(figsize=(10, 6))
