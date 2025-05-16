@@ -369,7 +369,7 @@ with tabs[2]:
         return np.random.normal(0, 1, n)
 
     data_lln = generate_data(dist_type_lln, trials)
-   cumulative = calculate_cumulative_mean(data_lln)
+    cumulative = calculate_cumulative_mean(data_lln)
     expected = np.mean(data_lln)
 
     fig3, ax3 = plt.subplots(figsize=(10, 5))
