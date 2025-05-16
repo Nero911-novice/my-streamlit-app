@@ -559,10 +559,10 @@ with tabs[4]:
     # Генерация данных
     @st.cache_data
     def generate_comparison_data(dist1, dist2, params1, params2, sample_size):
-    """Кэширует генерацию данных для сравнения распределений"""
-    data1 = generate_with_params(dist1, sample_size, **params1)
-    data2 = generate_with_params(dist2, sample_size, **params2)
-    return data1, data2
+        """Кэширует генерацию данных для сравнения распределений"""
+        data1 = generate_with_params(dist1, sample_size, **params1)
+        data2 = generate_with_params(dist2, sample_size, **params2)
+        return data1, data2
 
 data1, data2 = generate_comparison_data(dist1, dist2, params1, params2, sample_size)
     
