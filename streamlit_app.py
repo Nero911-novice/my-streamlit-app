@@ -160,7 +160,8 @@ if animate_clt:
         progress_bar.progress((i + 1) / len(sample_sizes))
         
         # Генерация данных для текущего размера выборки
-        means = [np.mean(generate_data(dist_type, n)) for _ in range(num_samples)]
+        # Используем уже определенную функцию generate() вместо generate_data()
+        means = [np.mean(generate(dist_type, n)) for _ in range(num_samples)]
         
         # Создание нового графика
         fig, ax = plt.subplots(figsize=(10, 5))
