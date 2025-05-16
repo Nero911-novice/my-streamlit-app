@@ -2,7 +2,9 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import stats  # Важно импортировать stats именно так
 from io import BytesIO
+import time  # Для использования в модуле регрессии к среднему
 
 # --- Настройка страницы и боковой панели с документацией ---
 sns.set_theme(style="whitegrid")
@@ -379,30 +381,56 @@ with tabs[4]:
     ax.set_ylabel("Частота")
     ax.legend()
     
+    # Отображение графика
+    st.pyplot(fig, use_container_width=True)
+    
     # Добавление статистических характеристик
     stats_col1, stats_col2 = st.columns(2)
     
-    with stats_col1:
-        st.subheader(f"Статистика: {dist1}")
-        st.write(f"Среднее: {np.mean(data1):.4f}")
-        st.write(f"Медиана: {np.median(data1):.4f}")
-        st.write(f"Стандартное отклонение: {np.std(data1):.4f}")
-        st.write(f"Минимум: {np.min(data1):.4f}")
-        st.write(f"Максимум: {np.max(data1):.4f}")
-        st.write(f"Асимметрия: {scipy.stats.skew(data1):.4f}")
-        st.write(f"Эксцесс: {scipy.stats.kurtosis(data1):.4f}")
-    
-    with stats_col2:
-        st.subheader(f"Статистика: {dist2}")
-        st.write(f"Среднее: {np.mean(data2):.4f}")
-        st.write(f"Медиана: {np.median(data2):.4f}")
-        st.write(f"Стандартное отклонение: {np.std(data2):.4f}")
-        st.write(f"Минимум: {np.min(data2):.4f}")
-        st.write(f"Максимум: {np.max(data2):.4f}")
-        st.write(f"Асимметрия: {scipy.stats.skew(data2):.4f}")
-        st.write(f"Эксцесс: {scipy.stats.kurtosis(data2):.4f}")
-    
-    st.pyplot(fig, use_container_width=True)
+    # Безопасный расчет статистики с обработкой ошибок
+    try:
+        with stats_col1:
+            st.subheader(f"Статистика: {dist1}")
+            st.write(f"Среднее: {np.mean(data1):.4f}")
+            st.write(f"Медиана: {np.median(data1):.4f}")
+            st.write(f"Стандартное отклонение: {np.std(data1):.4f}")
+            st.write(f"Минимум: {np.min(data1):.4f}")
+            st.write(f"Максимум: {np.max(data1):.4f}")
+            
+            # Используем try-except для асимметрии и эксцесса, так как они могут вызывать ошибки
+            try:
+                skewness = stats.skew(data1)
+                st.write(f"Асимметрия: {skewness:.4f}")
+            except:
+                st.write("Асимметрия: невозможно вычислить")
+                
+            try:
+                kurtosis = stats.kurtosis(data1)
+                st.write(f"Эксцесс: {kurtosis:.4f}")
+            except:
+                st.write("Эксцесс: невозможно вычислить")
+        
+        with stats_col2:
+            st.subheader(f"Статистика: {dist2}")
+            st.write(f"Среднее: {np.mean(data2):.4f}")
+            st.write(f"Медиана: {np.median(data2):.4f}")
+            st.write(f"Стандартное отклонение: {np.std(data2):.4f}")
+            st.write(f"Минимум: {np.min(data2):.4f}")
+            st.write(f"Максимум: {np.max(data2):.4f}")
+            
+            try:
+                skewness = stats.skew(data2)
+                st.write(f"Асимметрия: {skewness:.4f}")
+            except:
+                st.write("Асимметрия: невозможно вычислить")
+                
+            try:
+                kurtosis = stats.kurtosis(data2)
+                st.write(f"Эксцесс: {kurtosis:.4f}")
+            except:
+                st.write("Эксцесс: невозможно вычислить")
+    except Exception as e:
+        st.error(f"Произошла ошибка при расчете статистики: {str(e)}")
     
     # Кнопка для скачивания
     buf = BytesIO()
@@ -431,85 +459,116 @@ with tabs[5]:
     """)
     
     # Параметры симуляции
-    mu_reg = st.slider("Истинное среднее популяции", 0, 100, 50)
-    sigma_reg = st.slider("Стандартное отклонение", 5, 30, 15)
-    n_subjects = st.slider("Количество субъектов", 20, 500, 100)
-    threshold_percentile = st.slider("Порог отбора (процентиль)", 70, 95, 80)
+    col1, col2 = st.columns(2)
+    with col1:
+        mu_reg = st.slider("Истинное среднее популяции", 0, 100, 50)
+        sigma_reg = st.slider("Стандартное отклонение", 5, 30, 15)
+    
+    with col2:
+        n_subjects = st.slider("Количество субъектов", 20, 500, 100)
+        threshold_percentile = st.slider("Порог отбора (процентиль)", 70, 95, 80)
     
     # Генерация данных для первого и второго измерений
-    np.random.seed(42)  # для воспроизводимости
+    # Зафиксируем начальное состояние для воспроизводимости, но добавим вариативность на разных запусках
+    import time
+    seed_value = int(time.time()) % 1000  # Используем время как источник случайности
+    np.random.seed(seed_value)
     
-    # Истинные способности (неизвестны наблюдателю)
-    true_abilities = np.random.normal(mu_reg, sigma_reg/2, n_subjects)
+    try:
+        # Истинные способности (неизвестны наблюдателю)
+        true_abilities = np.random.normal(mu_reg, sigma_reg/2, n_subjects)
+        
+        # Первое измерение (тест 1): истинная способность + случайный шум
+        test1_scores = true_abilities + np.random.normal(0, sigma_reg/2, n_subjects)
+        
+        # Второе измерение (тест 2): также истинная способность + новый случайный шум
+        test2_scores = true_abilities + np.random.normal(0, sigma_reg/2, n_subjects)
+        
+        # Находим порог для выбора "лучших" субъектов
+        threshold = np.percentile(test1_scores, threshold_percentile)
+        
+        # Выбираем "лучших" субъектов по первому тесту
+        best_subjects_mask = test1_scores >= threshold
+        
+        # Проверка, что есть хотя бы один "лучший" субъект
+        if np.sum(best_subjects_mask) > 0:
+            best_subjects_test1 = test1_scores[best_subjects_mask]
+            best_subjects_test2 = test2_scores[best_subjects_mask]
+            
+            # Средние значения
+            all_mean_test1 = np.mean(test1_scores)
+            all_mean_test2 = np.mean(test2_scores)
+            best_mean_test1 = np.mean(best_subjects_test1)
+            best_mean_test2 = np.mean(best_subjects_test2)
+            
+            # Создаем график
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            # Разброс всех точек
+            ax.scatter(test1_scores, test2_scores, alpha=0.4, label="Все субъекты", color="gray")
+            
+            # Выделяем лучших субъектов
+            ax.scatter(best_subjects_test1, best_subjects_test2, alpha=0.6, 
+                       label=f"Лучшие субъекты (>{threshold_percentile}%)", color="red")
+            
+            # Линия y=x для сравнения
+            min_val = min(np.min(test1_scores), np.min(test2_scores))
+            max_val = max(np.max(test1_scores), np.max(test2_scores))
+            ax.plot([min_val, max_val], [min_val, max_val], 'k--', alpha=0.5, label="Линия y=x")
+            
+            # Средние линии
+            ax.axvline(all_mean_test1, color='blue', linestyle=':', alpha=0.5, 
+                      label=f"Среднее Тест 1 (все): {all_mean_test1:.1f}")
+            ax.axhline(all_mean_test2, color='green', linestyle=':', alpha=0.5, 
+                      label=f"Среднее Тест 2 (все): {all_mean_test2:.1f}")
+            
+            # Средние для лучших
+            ax.axvline(best_mean_test1, color='red', linestyle='--', alpha=0.5, 
+                      label=f"Среднее Тест 1 (лучшие): {best_mean_test1:.1f}")
+            ax.axhline(best_mean_test2, color='orange', linestyle='--', alpha=0.5, 
+                      label=f"Среднее Тест 2 (лучшие): {best_mean_test2:.1f}")
+            
+            # Настройка графика
+            ax.set_title("Регрессия к среднему")
+            ax.set_xlabel("Результаты первого теста")
+            ax.set_ylabel("Результаты второго теста")
+            ax.grid(True, alpha=0.3)
+            ax.legend(loc='upper left')
+            
+            # Отображение
+            st.pyplot(fig, use_container_width=True)
+            
+            # Разница в средних для лучших субъектов
+            diff = best_mean_test1 - best_mean_test2
+            pct_diff = (diff / best_mean_test1) * 100 if best_mean_test1 != 0 else 0
+            
+            # Результаты анализа
+            st.markdown(f"""
+            ### Результаты анализа
+            
+            **Наблюдения:**
+            - Среднее значение первого теста (все субъекты): {all_mean_test1:.2f}
+            - Среднее значение второго теста (все субъекты): {all_mean_test2:.2f}
+            - Среднее значение первого теста (лучшие субъекты): {best_mean_test1:.2f}
+            - Среднее значение второго теста (лучшие субъекты): {best_mean_test2:.2f}
+            - **Регрессия к среднему**: {diff:.2f} пунктов ({pct_diff:.1f}%)
+            """)
+            
+            # Кнопка для скачивания
+            buf = BytesIO()
+            fig.savefig(buf, format="png", dpi=300)
+            st.download_button("📥 Скачать график (PNG)", buf.getvalue(), "regression_to_mean.png", "image/png")
+        else:
+            st.warning("Не найдено ни одного субъекта, удовлетворяющего критерию отбора. Попробуйте снизить порог.")
     
-    # Первое измерение (тест 1): истинная способность + случайный шум
-    test1_scores = true_abilities + np.random.normal(0, sigma_reg/2, n_subjects)
+    except Exception as e:
+        st.error(f"Произошла ошибка при построении графика: {str(e)}")
     
-    # Второе измерение (тест 2): также истинная способность + новый случайный шум
-    test2_scores = true_abilities + np.random.normal(0, sigma_reg/2, n_subjects)
+    # Объяснение эффекта
+    st.markdown("""
+    ### Объяснение эффекта
     
-    # Находим порог для выбора "лучших" субъектов
-    threshold = np.percentile(test1_scores, threshold_percentile)
-    
-    # Выбираем "лучших" субъектов по первому тесту
-    best_subjects_mask = test1_scores >= threshold
-    best_subjects_test1 = test1_scores[best_subjects_mask]
-    best_subjects_test2 = test2_scores[best_subjects_mask]
-    
-    # Средние значения
-    all_mean_test1 = np.mean(test1_scores)
-    all_mean_test2 = np.mean(test2_scores)
-    best_mean_test1 = np.mean(best_subjects_test1)
-    best_mean_test2 = np.mean(best_subjects_test2)
-    
-    # Создаем график
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # Разброс всех точек
-    ax.scatter(test1_scores, test2_scores, alpha=0.4, label="Все субъекты", color="gray")
-    
-    # Выделяем лучших субъектов
-    ax.scatter(best_subjects_test1, best_subjects_test2, alpha=0.6, label=f"Лучшие субъекты (>{threshold_percentile}%)", color="red")
-    
-    # Линия y=x для сравнения
-    min_val = min(np.min(test1_scores), np.min(test2_scores))
-    max_val = max(np.max(test1_scores), np.max(test2_scores))
-    ax.plot([min_val, max_val], [min_val, max_val], 'k--', alpha=0.5, label="Линия y=x")
-    
-    # Средние линии
-    ax.axvline(all_mean_test1, color='blue', linestyle=':', alpha=0.5, label=f"Среднее Тест 1 (все): {all_mean_test1:.1f}")
-    ax.axhline(all_mean_test2, color='green', linestyle=':', alpha=0.5, label=f"Среднее Тест 2 (все): {all_mean_test2:.1f}")
-    
-    # Средние для лучших
-    ax.axvline(best_mean_test1, color='red', linestyle='--', alpha=0.5, label=f"Среднее Тест 1 (лучшие): {best_mean_test1:.1f}")
-    ax.axhline(best_mean_test2, color='orange', linestyle='--', alpha=0.5, label=f"Среднее Тест 2 (лучшие): {best_mean_test2:.1f}")
-    
-    # Настройка графика
-    ax.set_title("Регрессия к среднему")
-    ax.set_xlabel("Результаты первого теста")
-    ax.set_ylabel("Результаты второго теста")
-    ax.grid(True, alpha=0.3)
-    ax.legend(loc='upper left')
-    
-    # Отображение
-    st.pyplot(fig, use_container_width=True)
-    
-    # Разница в средних для лучших субъектов
-    diff = best_mean_test1 - best_mean_test2
-    pct_diff = (diff / best_mean_test1) * 100
-    
-    # Результаты анализа
-    st.markdown(f"""
-    ### Результаты анализа
-    
-    **Наблюдения:**
-    - Среднее значение первого теста (все субъекты): {all_mean_test1:.2f}
-    - Среднее значение второго теста (все субъекты): {all_mean_test2:.2f}
-    - Среднее значение первого теста (лучшие субъекты): {best_mean_test1:.2f}
-    - Среднее значение второго теста (лучшие субъекты): {best_mean_test2:.2f}
-    - **Регрессия к среднему**: {diff:.2f} пунктов ({pct_diff:.1f}%)
-    
-    📊 **Объяснение эффекта:**  
+    📊 **Суть регрессии к среднему:**  
     Если мы отбираем субъектов по высоким результатам первого измерения, во втором измерении 
     они в среднем показывают результаты ближе к среднему значению популяции. Это **не** означает, что 
     навыки ухудшились, а является статистическим артефактом.
@@ -520,11 +579,6 @@ with tabs[5]:
     - "Эффект лечения" при обращении с крайними симптомами: пациенты часто "улучшаются" без лечения
     - Оценка эффективности тренингов, начатых после провальных результатов
     """)
-    
-    # Кнопка для скачивания
-    buf = BytesIO()
-    fig.savefig(buf, format="png", dpi=300)
-    st.download_button("📥 Скачать график (PNG)", buf.getvalue(), "regression_to_mean.png", "image/png")
     
     # Дополнительная теоретическая информация
     with st.expander("Теоретическое обоснование"):
