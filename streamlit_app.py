@@ -238,8 +238,8 @@ with tabs[1]:
 
     @st.cache_data
     def generate_clt_means(dist_type, sample_size, num_samples):
-    """Кэширует вычисление выборочных средних для ЦПТ"""
-    return [np.mean(generate_data(dist_type, sample_size)) for _ in range(num_samples)]
+       """Кэширует вычисление выборочных средних для ЦПТ"""
+       return [np.mean(generate_data(dist_type, sample_size)) for _ in range(num_samples)]
 
     means = generate_clt_means(dist_type, sample_size, num_samples)
     fig2, ax2 = plt.subplots(figsize=(10, 5))
