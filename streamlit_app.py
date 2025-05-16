@@ -703,15 +703,16 @@ with tabs[5]:
     - "Эффект лечения" при обращении с крайними симптомами: пациенты часто "улучшаются" без лечения
     - Оценка эффективности тренингов, начатых после провальных результатов
     """)
+
 # === 8. Типы распределений ===
 with tabs[7]:
     st.header("Типы вероятностных распределений")
     st.markdown("""
     # Основные вероятностные распределения
 
-    Вероятностные распределения описывают, как распределены значения случайной величины.
-    Разные типы данных и явлений характеризуются разными распределениями.
-    Ниже описаны основные распределения, их свойства и примеры применения.
+    Вероятностные распределения описывают, как распределены значения случайной величины. Разные типы 
+    данных и явлений характеризуются разными распределениями. Ниже описаны основные распределения, 
+    их свойства и примеры применения.
     """)
 
     # Выбор распределения
@@ -729,7 +730,7 @@ with tabs[7]:
         ]
     )
 
-    # Две колонки: слева — график, справа — описание и формулы
+    # Отдельные колонки для графика и описания
     col1, col2 = st.columns([3, 2])
 
     # --- Нормальное распределение ---
@@ -748,34 +749,29 @@ with tabs[7]:
             ax.set_ylabel("f(x)")
             ax.axvline(mu, color='red', linestyle='--', label=f"μ = {mu}")
             ax.axvline(mu+sigma, color='green', linestyle=':', label=f"μ+σ = {mu+sigma:.1f}")
-            ax.axvline(mu-sigma, color='green', linestyle=':', label=f"μ-σ = {mu-sigma:.1f}")
+            ax.axvline(mu-sigma, color='green', linestyle=':', label=f"μ−σ = {mu-sigma:.1f}")
             ax.legend()
             fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
         with col2:
-            st.markdown("## Нормальное распределение")
-            st.markdown("**Суть:** Симметричная колоколообразная кривая, описывающая непрерывные величины, которые группируются вокруг среднего значения")
+            st.subheader("Нормальное распределение")
+            st.markdown("**Суть:** Симметричная колоколообразная кривая, описывающая непрерывные величины вокруг среднего.")
             st.markdown("**Параметры:**")
             st.write(f"- μ = {mu}")
             st.write(f"- σ = {sigma}")
-            st.markdown("**Формула:**")
-            st.latex(r"f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\!\Bigl(-\frac{(x-\mu)^2}{2\sigma^2}\Bigr)")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\Bigl(-\frac{(x-\mu)^2}{2\sigma^2}\Bigr)")
             st.markdown("**Примеры применения:**")
             st.write("- Рост и вес в популяции")
             st.write("- Ошибки измерений")
-            st.write("- Баланс финансовых показателей")
-            st.markdown("**Особенности:**")
-            st.write("- Симметрично относительно среднего")
-            st.write("- ~68% значений лежат в пределах ±1σ")
-            st.write("- ~95% значений лежат в пределах ±2σ")
-            st.write("- ~99.7% значений лежат в пределах ±3σ")
+            st.write("- IQ-тесты и другие естественные явления")
 
     # --- Равномерное распределение ---
     elif chosen_dist == "Равномерное":
         with col1:
-            a = st.slider("a (нижняя граница)", -5.0, 5.0, 0.0, 0.1)
-            b = st.slider("b (верхняя граница)", a + 0.1, a + 10.0, a + 1.0, 0.1)
+            a = st.slider("a (нижняя граница)", -10.0, 10.0, 0.0, 0.1)
+            b = st.slider("b (верхняя граница)", a + 0.1, a + 20.0, a + 1.0, 0.1)
             x = np.linspace(a - 1, b + 1, 500)
             y = np.where((x >= a) & (x <= b), 1/(b - a), 0)
 
@@ -791,20 +787,16 @@ with tabs[7]:
             st.pyplot(fig, use_container_width=True)
 
         with col2:
-            st.markdown("## Равномерное распределение")
-            st.markdown("**Суть:** Все значения на отрезке [a, b] равновероятны.")
+            st.subheader("Равномерное распределение")
+            st.markdown("**Суть:** Все значения в отрезке [a, b] равновероятны.")
             st.markdown("**Параметры:**")
             st.write(f"- a = {a}")
             st.write(f"- b = {b}")
-            st.markdown("**Формула:**")
-            st.latex(r"f(x) = \begin{cases}\frac{1}{b - a}, & a \le x \le b,\\0, & \text{иначе.}\end{cases}")
-            st.markdown("**Примеры:**")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(x) = \begin{cases} \frac{1}{b - a}, & a \le x \le b,\\ 0, & \text{иначе.} \end{cases}")
+            st.markdown("**Примеры применения:**")
             st.write("- Генерация случайных чисел")
-            st.write("- Моделирование ошибок округления")
-            st.write("- Время ожидания автобуса (если интервал движения точно соблюдается)")
-            st.markdown("**Особенности:**")
-            st.write("- Все значения равновероятны")
-            st.write("- Моделирование ошибок округления")
+            st.write("- Ошибки округления")
 
     # --- Биномиальное распределение ---
     elif chosen_dist == "Биномиальное":
@@ -825,31 +817,28 @@ with tabs[7]:
             st.pyplot(fig, use_container_width=True)
 
         with col2:
-            st.markdown("## Биномиальное распределение")
+            st.subheader("Биномиальное распределение")
             st.markdown("**Суть:** Вероятность получить k успехов в n независимых испытаниях.")
             st.markdown("**Параметры:**")
             st.write(f"- n = {n}")
             st.write(f"- p = {p}")
-            st.markdown("**Формула:**")
-            st.latex(r"P(X=k) = \binom{n}{k} p^k (1 - p)^{n - k}")
-            st.markdown("**Примеры:**")
+            st.markdown("**Формула вероятности:**")
+            st.latex(r"P(X=k) = \binom{n}{k}\,p^k\,(1-p)^{n-k}")
+            st.markdown("**Примеры применения:**")
             st.write("- Подбрасывание монеты")
             st.write("- A/B-тестирование")
 
-    # здесь аналогично для Пуассона, Экспоненциального, Логнормального, Хи-квадрат и t-распределения,
-    # формулу везде выводим через st.latex(r"...") вместо «сырой» многострочной markdown-строки.
-
-    # Например, для Пуассона:
+    # --- Распределение Пуассона ---
     elif chosen_dist == "Пуассона":
         with col1:
             lam = st.slider("λ (среднее число событий)", 0.1, 20.0, 5.0, 0.1)
-            x = np.arange(0, int(lam*3)+1)
+            x = np.arange(0, max(20, int(lam*3)) + 1)
             y = stats.poisson.pmf(x, lam)
 
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.bar(x, y, alpha=0.7)
             ax.set_title("Распределение Пуассона")
-            ax.set_xlabel("k")
+            ax.set_xlabel("k (число событий)")
             ax.set_ylabel("P(X=k)")
             ax.axvline(lam, color='red', linestyle='--', label=f"μ = {lam:.1f}")
             ax.legend()
@@ -857,16 +846,194 @@ with tabs[7]:
             st.pyplot(fig, use_container_width=True)
 
         with col2:
-            st.markdown("## Распределение Пуассона")
+            st.subheader("Распределение Пуассона")
             st.markdown("**Суть:** Число событий за фиксированный интервал при постоянной интенсивности.")
             st.markdown("**Параметр:**")
             st.write(f"- λ = {lam}")
-            st.markdown("**Формула:**")
+            st.markdown("**Формула вероятности:**")
             st.latex(r"P(X=k) = \frac{\lambda^k e^{-\lambda}}{k!}")
-            st.markdown("**Примеры:**")
+            st.markdown("**Примеры применения:**")
             st.write("- Звонки в колл-центр")
             st.write("- Радиоактивный распад")
 
+    # --- Экспоненциальное распределение ---
+    elif chosen_dist == "Экспоненциальное":
+        with col1:
+            rate = st.slider("λ (интенсивность)", 0.1, 5.0, 1.0, 0.1)
+            x = np.linspace(0, 5/rate, 500)
+            y = rate * np.exp(-rate * x)
+
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(x, y, linewidth=2)
+            ax.fill_between(x, y, alpha=0.2)
+            ax.set_title("Экспоненциальное распределение")
+            ax.set_xlabel("t")
+            ax.set_ylabel("f(t)")
+            ax.axvline(1/rate, color='red', linestyle='--', label=f"μ = {1/rate:.1f}")
+            ax.legend()
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
+
+        with col2:
+            st.subheader("Экспоненциальное распределение")
+            st.markdown("**Суть:** Время между событиями в процессе Пуассона.")
+            st.markdown("**Параметр:**")
+            st.write(f"- λ = {rate}")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(t) = \lambda e^{-\lambda t} \quad t \ge 0")
+            st.markdown("**Примеры применения:**")
+            st.write("- Время ожидания автобуса")
+            st.write("- Поломки оборудования")
+
+    # --- Логнормальное распределение ---
+    elif chosen_dist == "Логнормальное":
+        with col1:
+            mu_log    = st.slider("μ логарифма", -1.0, 2.0, 0.0, 0.1)
+            sigma_log = st.slider("σ логарифма", 0.1, 2.0, 0.5, 0.1)
+            x = np.linspace(0.01, np.exp(mu_log + 3*sigma_log), 500)
+            y = stats.lognorm.pdf(x, s=sigma_log, scale=np.exp(mu_log))
+
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(x, y, linewidth=2)
+            ax.fill_between(x, y, alpha=0.2)
+            ax.set_title("Логнормальное распределение")
+            ax.set_xlabel("x")
+            ax.set_ylabel("f(x)")
+            mean_ln = np.exp(mu_log + sigma_log**2/2)
+            ax.axvline(mean_ln, color='red', linestyle='--', label=f"μ* = {mean_ln:.2f}")
+            ax.legend()
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
+
+        with col2:
+            st.subheader("Логнормальное распределение")
+            st.markdown("**Суть:** Если ln(X) ~ N(μ,σ²), то X имеет логнормальное распределение.")
+            st.markdown("**Параметры:**")
+            st.write(f"- μ = {mu_log}")
+            st.write(f"- σ = {sigma_log}")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(x) = \frac{1}{x\sigma\sqrt{2\pi}} e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}}")
+            st.markdown("**Примеры применения:**")
+            st.write("- Доходы населения")
+            st.write("- Размеры файлов")
+
+    # --- Распределение Хи-квадрат ---
+    elif chosen_dist == "Хи-квадрат":
+        with col1:
+            df = st.slider("Степени свободы (k)", 1, 20, 5)
+            x = np.linspace(0.01, df*3, 500)
+            y = stats.chi2.pdf(x, df)
+
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(x, y, linewidth=2)
+            ax.fill_between(x, y, alpha=0.2)
+            ax.set_title("Распределение χ²")
+            ax.set_xlabel("x")
+            ax.set_ylabel("f(x)")
+            ax.axvline(df, color='red', linestyle='--', label=f"μ = {df}")
+            ax.legend()
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
+
+        with col2:
+            st.subheader("Распределение χ²")
+            st.markdown("**Суть:** Сумма квадратов k независимых N(0,1).")
+            st.markdown("**Параметры:**")
+            st.write(f"- k = {df}")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(x) = \frac{1}{2^{k/2}\,\Gamma(k/2)} x^{k/2-1} e^{-x/2}")
+            st.markdown("**Примеры применения:**")
+            st.write("- Критерий согласия")
+            st.write("- Оценка дисперсии")
+
+    # --- Распределение Стьюдента (t) ---
+    elif chosen_dist == "Стьюдента (t)":
+        with col1:
+            df_t = st.slider("Степени свободы (ν)", 1, 30, 5)
+            x = np.linspace(-5, 5, 500)
+            y_t = stats.t.pdf(x, df_t)
+            y_norm = stats.norm.pdf(x)
+
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(x, y_t, linewidth=2, label=f"t (ν={df_t})")
+            ax.plot(x, y_norm, linestyle='--', label="N(0,1)")
+            ax.fill_between(x, y_t, alpha=0.2)
+            ax.set_title("Распределение Стьюдента")
+            ax.set_xlabel("x")
+            ax.set_ylabel("f(x)")
+            ax.legend()
+            fig.tight_layout()
+            st.pyplot(fig, use_container_width=True)
+
+        with col2:
+            st.subheader("Распределение Стьюдента")
+            st.markdown("**Суть:** Распределение выборочного среднего при неизвестной σ.")
+            st.markdown("**Параметры:**")
+            st.write(f"- ν = {df_t}")
+            st.markdown("**Формула плотности вероятности:**")
+            st.latex(r"f(x) = \frac{\Gamma\bigl(\tfrac{\nu+1}{2}\bigr)}{\sqrt{\nu\pi}\,\Gamma\bigl(\tfrac{\nu}{2}\bigr)}\Bigl(1+\frac{x^2}{\nu}\Bigr)^{-\tfrac{\nu+1}{2}}")
+            st.markdown("**Примеры применения:**")
+            st.write("- t-тесты")
+            st.write("- Доверительные интервалы")
+
+    # --- Секция сравнения и сводной таблицы ---
+    st.markdown("---")
+    st.subheader("Сравнение основных распределений")
+    if st.checkbox("Показать сравнение распределений"):
+        mode = st.radio("Тип сравнения:", ["Непрерывные", "Дискретные"])
+        if mode == "Непрерывные":
+            xs = np.linspace(-4, 8, 300)
+            fig, ax = plt.subplots(figsize=(8,4))
+            ax.plot(xs, stats.norm.pdf(xs), label="Нормальное")
+            ax.plot(xs, stats.expon.pdf(xs), label="Экспоненциальное")
+            ax.plot(xs, stats.lognorm.pdf(xs, s=0.5), label="Логнормальное")
+            ax.legend(); ax.set_title("Непрерывные распределения")
+            st.pyplot(fig, use_container_width=True)
+        else:
+            ks = np.arange(0,21)
+            fig, ax = plt.subplots(figsize=(8,4))
+            ax.bar(ks-0.2, stats.binom.pmf(ks,20,0.25), width=0.4, label="Биномиальное")
+            ax.bar(ks+0.2, stats.poisson.pmf(ks,5), width=0.4, label="Пуассона")
+            ax.legend(); ax.set_title("Дискретные распределения")
+            st.pyplot(fig, use_container_width=True)
+
+    st.markdown("### Сводная таблица распределений")
+    st.table({
+        "Распределение": ["Нормальное","Равномерное","Биномиальное","Пуассона","Экспоненциальное"],
+        "Тип":           ["Непрерывное","Непрерывное","Дискретное","Дискретное","Непрерывное"],
+        "Параметры":     ["μ,σ","a,b","n,p","λ","λ"],
+        "Среднее":       ["μ","(a+b)/2","n·p","λ","1/λ"],
+        "Дисперсия":     ["σ²","(b-a)²/12","n·p·(1-p)","λ","1/λ²"]
+    })
+
+    st.markdown("""
+    ### Как выбрать подходящее распределение?
+
+    1. **Непрерывные или дискретные данные?**  
+       - Дискретные: Биномиальное, Пуассона и др.  
+       - Непрерывные: Нормальное, Экспоненциальное и др.
+
+    2. **Природа данных:**  
+       - Время до события → Экспоненциальное  
+       - Количество событий → Пуассона  
+       - Испытания успех/неудача → Биномиальное  
+       - Группировка вокруг центра → Нормальное  
+       - Положительные с тяжёлым хвостом → Логнормальное  
+
+    3. **Проверка на ваших данных:**  
+       QQ-графики, критерии согласия, визуальный анализ гистограмм.
+
+    4. **ЦПТ:**  
+       Средние выборок часто приближаются к нормальному распределению.
+    """)
+
+    st.markdown("""
+    ### Полезные ресурсы
+
+    - https://seeing-theory.brown.edu  
+    - https://stattrek.com  
+    - https://en.wikipedia.org/wiki/List_of_probability_distributions
+    """)
    
        # Обработка ошибок и предупреждения
 try:
