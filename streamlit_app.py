@@ -707,15 +707,15 @@ with tabs[5]:
 # === 8. Типы распределений ===
 with tabs[7]:
     st.header("Типы вероятностных распределений")
-    st.markdown("""
+    st.markdown(r"""
     # Основные вероятностные распределения
-    
+
     Вероятностные распределения описывают, как распределены значения случайной величины. Разные типы 
     данных и явлений характеризуются разными распределениями. Ниже описаны основные распределения, 
     их свойства и примеры применения.
     """)
 
-    # Выбор распределения для демонстрации
+    # Выбор распределения
     chosen_dist = st.selectbox(
         "Выберите распределение для изучения:",
         [
@@ -730,18 +730,17 @@ with tabs[7]:
         ]
     )
 
-    # Контейнеры для визуализации и описания
-    visual_col1, visual_col2 = st.columns([3, 2])
+    # Контейнеры для графика и описания
+    col1, col2 = st.columns([3, 2])
 
-    # === Нормальное распределение ===
+    # --- Нормальное распределение ---
     if chosen_dist == "Нормальное (Гауссово)":
-        with visual_col1:
-            mu = st.slider("Среднее (μ)", -10.0, 10.0, 0.0, 0.1)
-            sigma = st.slider("Стандартное отклонение (σ)", 0.1, 5.0, 1.0, 0.1)
-            
-            # Построение плотности
+        with col1:
+            mu    = st.slider("μ (среднее)", -10.0, 10.0, 0.0, 0.1)
+            sigma = st.slider("σ (стандартное отклонение)", 0.1, 5.0, 1.0, 0.1)
             x = np.linspace(mu - 4*sigma, mu + 4*sigma, 1000)
             y = stats.norm.pdf(x, mu, sigma)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.plot(x, y, linewidth=2)
             ax.fill_between(x, y, alpha=0.2)
@@ -751,143 +750,156 @@ with tabs[7]:
             ax.axvline(mu, color='red', linestyle='--', label=f"μ = {mu}")
             ax.axvline(mu+sigma, color='green', linestyle=':', label=f"μ+σ = {mu+sigma:.1f}")
             ax.axvline(mu-sigma, color='green', linestyle=':', label=f"μ-σ = {mu-sigma:.1f}")
-            ax.legend(); fig.tight_layout()
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Нормальное распределение
-            
+
             **Суть:** Колоколообразная, симметричная функция плотности, описывающая множество природных явлений.
-            
+
             **Параметры:**
-            - μ (среднее) = {mu}
-            - σ (стандартное отклонение) = {sigma}
-            
+            - μ = {mu}
+            - σ = {sigma}
+
             **Формула:**
-            $$f(x) = \dfrac{1}{\sigma\sqrt{2\pi}} \exp\Bigl(-\tfrac{(x-\mu)^2}{2\sigma^2}\Bigr)$$
-            
+            $$
+            f(x) = \frac{1}{\sigma\sqrt{2\pi}}
+            \exp\!\Bigl(-\frac{(x-\mu)^2}{2\sigma^2}\Bigr)
+            $$
+
             **Примеры применения:**
             - Рост и вес в популяции
             - Ошибки измерений
             - Баланс финансовых показателей
             """)
 
-    # === Равномерное распределение ===
+    # --- Равномерное распределение ---
     elif chosen_dist == "Равномерное":
-        with visual_col1:
-            a = st.slider("Нижняя граница (a)", -10.0, 10.0, 0.0, 0.1)
-            b = st.slider("Верхняя граница (b)", a + 0.1, a + 20.0, a + 1.0, 0.1)
-            
+        with col1:
+            a = st.slider("a (нижняя граница)", -10.0, 10.0, 0.0, 0.1)
+            b = st.slider("b (верхняя граница)", a + 0.1, a + 20.0, a + 1.0, 0.1)
             x = np.linspace(a - 1, b + 1, 1000)
             y = np.where((x >= a) & (x <= b), 1/(b - a), 0)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.plot(x, y, linewidth=2)
             ax.fill_between(x, y, alpha=0.2)
             ax.set_title("Равномерное распределение")
             ax.set_xlabel("x")
             ax.set_ylabel("f(x)")
-            ax.axvline((a+b)/2, color='red', linestyle='--', label=f"μ = {(a+b)/2:.1f}")
-            ax.legend(); fig.tight_layout()
+            ax.axvline((a + b)/2, color='red', linestyle='--', label=f"μ = {(a+b)/2:.1f}")
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Равномерное распределение
-            
-            **Суть:** Все значения в интервале [a, b] равновероятны.
-            
+
+            **Суть:** Все значения на отрезке [a, b] равновероятны.
+
             **Параметры:**
             - a = {a}
             - b = {b}
-            
+
             **Формула:**
-            $$f(x) = 
+            $$
+            f(x) = 
             \begin{cases}
-              \frac{1}{b-a}, & a \le x \le b,\\
-              0, & \text{иначе.}
-            \end{cases}$$
-            
+              \frac{1}{b - a}, & a \le x \le b,\\
+              0, & \text{иначе}.
+            \end{cases}
+            $$
+
             **Примеры:**
             - Генерация случайных чисел
-            - Ошибка округления
+            - Моделирование ошибок округления
             """)
 
-    # === Биномиальное распределение ===
+    # --- Биномиальное распределение ---
     elif chosen_dist == "Биномиальное":
-        with visual_col1:
-            n = st.slider("Число испытаний (n)", 1, 50, 20)
-            p = st.slider("Вероятность успеха (p)", 0.0, 1.0, 0.5, 0.01)
-            
-            x = np.arange(0, n+1)
+        with col1:
+            n = st.slider("n (число испытаний)", 1, 50, 20)
+            p = st.slider("p (вероятность успеха)", 0.0, 1.0, 0.5, 0.01)
+            x = np.arange(0, n + 1)
             y = stats.binom.pmf(x, n, p)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.bar(x, y, alpha=0.7)
             ax.set_title("Биномиальное распределение")
-            ax.set_xlabel("k (число успехов)")
+            ax.set_xlabel("k (количество успехов)")
             ax.set_ylabel("P(X=k)")
             ax.axvline(n*p, color='red', linestyle='--', label=f"μ = {n*p:.1f}")
-            ax.legend(); fig.tight_layout()
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Биномиальное распределение
-            
+
             **Суть:** Вероятность получить k успехов в n независимых испытаниях.
-            
+
             **Параметры:**
             - n = {n}
             - p = {p}
-            
+
             **Формула:**
-            $$P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$$
-            
+            $$
+            P(X=k) = \binom{n}{k} \, p^k \,(1-p)^{n-k}
+            $$
+
             **Примеры:**
             - Подбрасывание монеты
-            - Тестирование A/B
+            - A/B-тестирование
             """)
 
-    # === Распределение Пуассона ===
+    # --- Распределение Пуассона ---
     elif chosen_dist == "Пуассона":
-        with visual_col1:
+        with col1:
             lam = st.slider("λ (среднее число событий)", 0.1, 20.0, 5.0, 0.1)
-            
-            x = np.arange(0, int(lam*3)+1)
+            x = np.arange(0, int(lam*3) + 1)
             y = stats.poisson.pmf(x, lam)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.bar(x, y, alpha=0.7)
             ax.set_title("Распределение Пуассона")
             ax.set_xlabel("k (число событий)")
             ax.set_ylabel("P(X=k)")
             ax.axvline(lam, color='red', linestyle='--', label=f"μ = {lam:.1f}")
-            ax.legend(); fig.tight_layout()
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Распределение Пуассона
-            
-            **Суть:** Описывает число событий за фиксированный интервал при постоянной интенсивности.
-            
+
+            **Суть:** Число событий за фиксированный интервал при постоянной интенсивности.
+
             **Параметр:**
             - λ = {lam}
-            
+
             **Формула:**
-            $$P(X=k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
-            
+            $$
+            P(X=k) = \frac{\lambda^k e^{-\lambda}}{k!}
+            $$
+
             **Примеры:**
             - Звонки в колл-центр
             - Радиоактивный распад
             """)
 
-    # === Экспоненциальное распределение ===
+    # --- Экспоненциальное распределение ---
     elif chosen_dist == "Экспоненциальное":
-        with visual_col1:
+        with col1:
             rate = st.slider("λ (интенсивность)", 0.1, 5.0, 1.0, 0.1)
-            
             x = np.linspace(0, 5/rate, 1000)
             y = rate * np.exp(-rate * x)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.plot(x, y, linewidth=2)
             ax.fill_between(x, y, alpha=0.2)
@@ -895,161 +907,172 @@ with tabs[7]:
             ax.set_xlabel("t")
             ax.set_ylabel("f(t)")
             ax.axvline(1/rate, color='red', linestyle='--', label=f"μ = {1/rate:.1f}")
-            ax.legend(); fig.tight_layout()
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Экспоненциальное распределение
-            
+
             **Суть:** Время между событиями в процессе Пуассона.
-            
+
             **Параметр:**
             - λ = {rate}
-            
+
             **Формула:**
-            $$f(t) = \lambda e^{-\lambda t},\quad t \ge 0$$
-            
+            $$
+            f(t) = \lambda e^{-\lambda t}, \quad t \ge 0
+            $$
+
             **Примеры:**
             - Время ожидания автобуса
             - Поломки оборудования
             """)
 
-    # === Логнормальное распределение ===
+    # --- Логнормальное распределение ---
     elif chosen_dist == "Логнормальное":
-        with visual_col1:
-            mu_log = st.slider("μ логарифма", -1.0, 2.0, 0.0, 0.1)
+        with col1:
+            mu_log    = st.slider("μ логарифма", -1.0, 2.0, 0.0, 0.1)
             sigma_log = st.slider("σ логарифма", 0.1, 2.0, 0.5, 0.1)
-            
             x = np.linspace(0.01, np.exp(mu_log + 3*sigma_log), 1000)
             y = stats.lognorm.pdf(x, s=sigma_log, scale=np.exp(mu_log))
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.plot(x, y, linewidth=2)
             ax.fill_between(x, y, alpha=0.2)
             ax.set_title("Логнормальное распределение")
             ax.set_xlabel("x")
             ax.set_ylabel("f(x)")
-            mean_val = np.exp(mu_log + sigma_log**2/2)
-            ax.axvline(mean_val, color='red', linestyle='--', label=f"μ* = {mean_val:.2f}")
-            ax.legend(); fig.tight_layout()
+            mean_ln = np.exp(mu_log + sigma_log**2 / 2)
+            ax.axvline(mean_ln, color='red', linestyle='--', label=f"μ* = {mean_ln:.2f}")
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Логнормальное распределение
-            
+
             **Суть:** Если ln(X) ~ N(μ,σ²), то X имеет логнормальное распределение.
-            
+
             **Параметры:**
             - μ = {mu_log}
             - σ = {sigma_log}
-            
+
             **Формула:**
-            $$f(x) = \frac{1}{x\sigma\sqrt{2\pi}}
-            \exp\Bigl(-\frac{(\ln x - \mu)^2}{2\sigma^2}\Bigr)$$
-            
+            $$
+            f(x) = \frac{1}{x\sigma\sqrt{2\pi}}
+            \exp\!\Bigl(-\frac{(\ln x - \mu)^2}{2\sigma^2}\Bigr)
+            $$
+
             **Примеры:**
             - Доходы населения
             - Размер файлов
             """)
 
-    # === Распределение Хи-квадрат ===
+    # --- Распределение Хи-квадрат ---
     elif chosen_dist == "Хи-квадрат":
-        with visual_col1:
-            df = st.slider("Степени свободы (k)", 1, 20, 5)
-            
-            x = np.linspace(0.01, df*3, 1000)
-            y = stats.chi2.pdf(x, df)
+        with col1:
+            df_chi = st.slider("k (степень свободы)", 1, 20, 5)
+            x = np.linspace(0.01, df_chi * 3, 1000)
+            y = stats.chi2.pdf(x, df_chi)
+
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.plot(x, y, linewidth=2)
             ax.fill_between(x, y, alpha=0.2)
             ax.set_title("Распределение Хи-квадрат")
             ax.set_xlabel("x")
             ax.set_ylabel("f(x)")
-            ax.axvline(df, color='red', linestyle='--', label=f"μ = {df}")
-            ax.legend(); fig.tight_layout()
+            ax.axvline(df_chi, color='red', linestyle='--', label=f"μ = {df_chi}")
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
+        with col2:
+            st.markdown(rf"""
             ## Распределение Хи-квадрат
-            
+
             **Суть:** Сумма квадратов k независимых N(0,1).
-            
+
             **Параметр:**
-            - k = {df}
-            
+            - k = {df_chi}
+
             **Формула:**
-            $$f(x) = \frac{1}{2^{k/2}\Gamma(k/2)} x^{\frac{k}{2}-1} e^{-x/2}$$
-            
+            $$
+            f(x) = \frac{1}{2^{k/2}\,\Gamma\bigl(\tfrac{k}{2}\bigr)}\,
+            x^{\tfrac{k}{2}-1} e^{-x/2}
+            $$
+
             **Примеры:**
             - Критерий согласия
             - Оценка дисперсии
             """)
 
-    # === Распределение Стьюдента ===
+    # --- Распределение Стьюдента (t) ---
     elif chosen_dist == "Стьюдента (t)":
-        with visual_col1:
-            df_t = st.slider("Степени свободы (ν)", 1, 30, 5)
-            
+        with col1:
+            df_t = st.slider("ν (степень свободы)", 1, 30, 5)
             x = np.linspace(-5, 5, 1000)
             y_t = stats.t.pdf(x, df_t)
             y_norm = stats.norm.pdf(x)
+
             fig, ax = plt.subplots(figsize=(8, 5))
-            ax.plot(x, y_t, linewidth=2, label=f"t-распределение ν={df_t}")
-            ax.plot(x, y_norm, linestyle='--', label="Н(0,1)")
+            ax.plot(x, y_t, linewidth=2, label=f"t, ν={df_t}")
+            ax.plot(x, y_norm, linestyle='--', label="Нормальное N(0,1)")
             ax.fill_between(x, y_t, alpha=0.2)
             ax.set_title("Распределение Стьюдента (t)")
             ax.set_xlabel("x")
             ax.set_ylabel("f(x)")
-            ax.legend(); fig.tight_layout()
+            ax.legend()
+            fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-        with visual_col2:
-            st.markdown(f"""
-            ## Распределение Стьюдента
-            
+        with col2:
+            st.markdown(rf"""
+            ## Распределение Стьюдента (t)
+
             **Суть:** Распределение выборочного среднего при неизвестной σ.
-            
-            **Параметры:**
+
+            **Параметр:**
             - ν = {df_t}
-            
+
             **Формула:**
-            $$f(x) = \frac{\Gamma(\frac{\nu+1}{2})}
-            {\sqrt{\nu\pi}\,\Gamma(\frac{\nu}{2})}
-            \Bigl(1+\frac{x^2}{\nu}\Bigr)^{-\frac{\nu+1}{2}}$$
-            
+            $$
+            f(x) = \frac{\Gamma\!\bigl(\tfrac{\nu+1}{2}\bigr)}
+            {\sqrt{\nu\pi}\,\Gamma\!\bigl(\tfrac{\nu}{2}\bigr)}
+            \Bigl(1 + \frac{x^2}{\nu}\Bigr)^{-\tfrac{\nu+1}{2}}
+            $$
+
             **Примеры:**
             - t-тесты
             - Доверительные интервалы
             """)
 
-    # Разделитель и дополнительные материалы
+    # --- Сравнение и сводная таблица ---
     st.markdown("---")
     st.subheader("Сравнение основных распределений")
 
-    show_comparison = st.checkbox("Показать сравнение непрерывных/дискретных распределений", value=False)
-    if show_comparison:
-        compare_type = st.radio("Тип сравнения:", ["Непрерывные", "Дискретные"])
-        if compare_type == "Непрерывные":
+    if st.checkbox("Показать сравнение непрерывных/дискретных", value=False):
+        compare = st.radio("Тип сравнения:", ["Непрерывные", "Дискретные"])
+        if compare == "Непрерывные":
             x = np.linspace(-4, 8, 500)
-            fig, ax = plt.subplots(figsize=(8, 5))
+            fig, ax = plt.subplots(figsize=(8,5))
             ax.plot(x, stats.norm.pdf(x), label="Нормальное")
             ax.plot(x, stats.expon.pdf(x), label="Экспоненциальное")
             ax.plot(x, stats.lognorm.pdf(x, s=0.5), label="Логнормальное")
-            ax.set_title("Сравнение непрерывных распределений")
+            ax.set_title("Непрерывные распределения")
             ax.legend(); fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
         else:
             k = np.arange(0, 21)
-            fig, ax = plt.subplots(figsize=(8, 5))
+            fig, ax = plt.subplots(figsize=(8,5))
             ax.bar(k-0.2, stats.binom.pmf(k, 20, 0.25), width=0.4, label="Биномиальное")
             ax.bar(k+0.2, stats.poisson.pmf(k, 5), width=0.4, label="Пуассона")
-            ax.set_title("Сравнение дискретных распределений")
+            ax.set_title("Дискретные распределения")
             ax.legend(); fig.tight_layout()
             st.pyplot(fig, use_container_width=True)
 
-    # Сводная таблица
     st.markdown("### Сводная таблица распределений")
     st.table({
         "Распределение": ["Нормальное","Равномерное","Биномиальное","Пуассона","Экспоненциальное"],
@@ -1059,19 +1082,12 @@ with tabs[7]:
         "Дисперсия":     ["σ²","(b-a)²/12","n·p(1-p)","λ","1/λ²"]
     })
 
-    # Заключение и ссылки
-    st.markdown("""
-    ### Как выбрать распределение?
-    1. Дискретное или непрерывное?
-    2. Что моделируется: времена, счётчики, ошибки?
-    3. Графики Q–Q, критерии согласия.
-    
+    st.markdown(r"""
     ### Полезные ресурсы
-    - https://seeing-theory.brown.edu
-    - https://stattrek.com
-    - https://en.wikipedia.org/wiki/List_of_probability_distributions
+    - https://seeing-theory.brown.edu  
+    - https://stattrek.com  
+    - https://en.wikipedia.org/wiki/List_of_probability_distributions  
     """)
-
    
     # Дополнительная теоретическая информация
     with st.expander("Теоретическое обоснование"):
