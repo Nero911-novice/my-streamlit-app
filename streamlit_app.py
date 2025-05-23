@@ -525,10 +525,26 @@ def small_samples_tab():
     with col3:
         num_sim = st.slider("Количество симуляций", 100, 2000, 500, step=100)
     
-    # Генерация данных
+    # Генерация данных - БЕЗ кэширования для получения разных выборок
     means_small = []
-    for _ in range(num_sim):
-        sample = generate_distribution_data(dist_small, n_small)
+    
+    # Генерируем каждую выборку с разным seed
+    for i in range(num_sim):
+        np.random.seed(i + 1000)  # Разные seeds для каждой симуляции
+        
+        if dist_small == "Нормальное":
+            sample = np.random.normal(0, 1, n_small)
+        elif dist_small == "Равномерное":
+            sample = np.random.uniform(0, 1, n_small)
+        elif dist_small == "Экспоненциальное":
+            sample = np.random.exponential(1, n_small)
+        elif dist_small == "Бимодальное":
+            half = n_small // 2
+            sample = np.concatenate([
+                np.random.normal(-2, 1, half), 
+                np.random.normal(2, 1, n_small - half)
+            ])
+        
         means_small.append(np.mean(sample))
     
     means_small = np.array(means_small)
