@@ -40,11 +40,21 @@ def generate_bimodal_data(size: int, mu1: float = -2, mu2: float = 2,
     ])
 
 @st.cache_data
-def calculate_sample_means(dist_type: str, sample_size: int, num_samples: int, **params) -> np.ndarray:
+def calculate_sample_means(dist_type: str, sample_size: int, num_samples: int) -> np.ndarray:
     """Кэшированное вычисление выборочных средних для ЦПТ"""
     means = []
     for _ in range(num_samples):
-        sample = generate_distribution_data(dist_type, sample_size, **params)
+        # Генерируем данные без кэширования внутри цикла
+        if dist_type == "Равномерное": 
+            sample = np.random.uniform(0, 1, sample_size)
+        elif dist_type == "Экспоненциальное": 
+            sample = np.random.exponential(1.0, sample_size)
+        elif dist_type == "Бимодальное":
+            h = sample_size // 2
+            sample = np.concatenate([np.random.normal(-2, 1, h), np.random.normal(2, 1, sample_size-h)])
+        else:  # Нормальное
+            sample = np.random.normal(0, 1, sample_size)
+        
         means.append(np.mean(sample))
     return np.array(means)
 
