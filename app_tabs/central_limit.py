@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 import seaborn as sns
 from .utils import calculate_sample_means, create_download_button
