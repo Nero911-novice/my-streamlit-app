@@ -1136,7 +1136,7 @@ def create_distribution_plot(dist_name: str):
         x = np.arange(0, 15)
         y = stats.poisson.pmf(x, lam)
         ax.bar(x, y, alpha=0.7, color='purple', edgecolor='black')
-        ax.axvline(lam, color='red', linestyle='--', linewidth=2, label=f'μ = λ = {lam}')
+        ax.axvline(lam, color='red', linestyle='--', linewidth=2, label=f'μ = {lam}')
         ax.set_title(f"Распределение Пуассона (λ = {lam})", fontsize=14)
     
     elif dist_name == "Экспоненциальное":
