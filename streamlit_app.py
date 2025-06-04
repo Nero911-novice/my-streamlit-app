@@ -16,7 +16,6 @@ st.set_page_config(page_title="Демоверсия вероятностных �
 @st.cache_data
 def generate_distribution_data(dist_type: str, size: int, **params) -> np.ndarray:
     """Универсальная функция для генерации данных различных распределений с кэшированием"""
-    np.random.seed(42)  # Для воспроизводимости
     
     distributions = {
         "Нормальное": lambda: np.random.normal(params.get('mu', 0), params.get('sigma', 1), size),
@@ -804,8 +803,6 @@ def generate_regression_data(mu_reg: int, sigma_reg: int, n_subjects: int,
                            threshold_percentile: int) -> Optional[Tuple]:
     """Генерация данных для демонстрации регрессии к среднему"""
     try:
-        # Фиксируем seed для воспроизводимости
-        np.random.seed(42)
         
         # Истинные способности
         true_abilities = np.random.normal(mu_reg, sigma_reg/2, n_subjects)
