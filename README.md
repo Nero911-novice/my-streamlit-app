@@ -38,5 +38,6 @@ git clone https://github.com/Nero911-novice/my-streamlit-app.git
 cd my-streamlit-app
 pip install -r requirements.txt
 streamlit run streamlit_app.py
+```
 
-
+Приложение запустится в браузере по адресу, указанному Streamlit (обычно `localhost:8501`).
