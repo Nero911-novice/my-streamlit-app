@@ -40,4 +40,3 @@ pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
-Приложение запустится в браузере по адресу, указанному Streamlit (обычно `localhost:8501`).
